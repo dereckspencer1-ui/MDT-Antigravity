@@ -270,16 +270,30 @@ body.theme-pro {
   
   /* Logotipo gigante vívido (sin marcas de agua) */
   background: 
-    url('/Mendigotoken-logo.png') center center / 60% no-repeat fixed,
-    #f8fafc !important;
+    url('/Mendigotoken-logo.png') center center / 80% no-repeat fixed,
+    #ffffff !important;
   color: hsl(var(--foreground)) !important;
 }
 
+body.theme-pro header {
+  background: #ffffff !important;
+  border-bottom: 2px solid #0b4151 !important;
+}
+
+/* Forzar que toda la ensalada de colores del NavBar se vuelva RAL 5020 sólido */
+body.theme-pro header * {
+  color: #0b4151 !important;
+  font-family: var(--font-inter) !important;
+  text-shadow: none !important;
+  border-color: rgba(11, 65, 81, 0.2) !important;
+  box-shadow: none !important;
+}
+
 body.theme-pro .glass-panel {
-  background: rgba(255, 255, 255, 0.6) !important;
-  backdrop-filter: blur(40px) !important;
-  -webkit-backdrop-filter: blur(40px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.1) !important; /* Esmerilado ultra transparente */
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
   color: hsl(var(--foreground)) !important;
 }
