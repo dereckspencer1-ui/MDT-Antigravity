@@ -83,10 +83,9 @@ const TopNav = ({ user }) => {
                     filter: 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.8))'
                 }} />
             </div>
-                <h1 style={{ fontSize: '18px', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ color: 'var(--primary)', textShadow: '0 0 10px rgba(0,255,100,0.5)' }}>MENDIGOTOKEN</span>
-                    <span style={{ color: '#F59E0B' }}>PRO</span>
-                </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <img src="/mdt-logo-white.png" alt="MDT PRO" style={{ height: '32px' }} />
+            </div>
         </div>
 
         {/* Navigation Pills */}
