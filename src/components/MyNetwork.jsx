@@ -4,7 +4,6 @@ import { getGlobalMetrics, sendMDT } from '../store/mockDB';
 
 const MyNetwork = ({ user, metrics }) => {
   const [copied, setCopied] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState('');
   const [sendAmount, setSendAmount] = useState('');
   const [sendEmail, setSendEmail] = useState('');
   
@@ -43,12 +42,18 @@ const MyNetwork = ({ user, metrics }) => {
 
   const handleWithdraw = (e) => {
     e.preventDefault();
-    if (Number(withdrawAmount) <= 0) return;
+    const amountToWithdraw = localUser.mdtBalance || 0;
+    if (amountToWithdraw <= 0) {
+        alert("No tienes saldo suficiente para realizar un retiro.");
+        return;
+    }
+    
+    if (!window.confirm(`¿Estás seguro de que deseas retirar la totalidad de tus MDTs (${amountToWithdraw.toFixed(4)} MDT)?`)) return;
+
     try {
       import('../store/mockDB').then(({ withdrawMDT }) => {
-          const usdtReceived = withdrawMDT(user.id, Number(withdrawAmount));
-          alert(`¡Retiro Exitoso! Has quemado ${withdrawAmount} MDT.\nHas recibido $${usdtReceived.toFixed(2)} USDT en tu Billetera Externa.`);
-          setWithdrawAmount('');
+          const usdtReceived = withdrawMDT(user.id, amountToWithdraw);
+          alert(`¡Retiro Exitoso! Has quemado la totalidad de tus MDT (${amountToWithdraw.toFixed(4)} MDT).\nHas recibido $${usdtReceived.toFixed(2)} USDT en tu Billetera Externa.`);
       });
     } catch (err) {
       alert(err.message || 'Error processing withdrawal');
@@ -179,11 +184,12 @@ const MyNetwork = ({ user, metrics }) => {
                   <HandCoins size={24} color="#F59E0B" /> Quema Criptográfica (MDT → USDT)
               </h4>
               <form onSubmit={handleWithdraw} style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
+                  <p style={{ display: 'block', textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.8)', marginBottom: '8px' }}>Monto a Liquidar (100% de la Billetera Interna)</p>
                  <div style={{ position: 'relative' }}>
                      <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#F59E0B', fontWeight: 'bold' }}>$</span>
-                     <input type="number" min="0.1" step="0.1" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} placeholder="0.00 MDT" className="glass-input" style={{ width: '100%', padding: '16px 16px 16px 40px', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold', color: '#F59E0B', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(245,158,11,0.3)' }} required />
+                     <input type="text" value={(localUser.mdtBalance || 0).toFixed(4)} readOnly className="glass-input" style={{ width: '100%', padding: '16px 16px 16px 40px', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold', color: '#555', background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(245,158,11,0.3)', cursor: 'not-allowed' }} />
                  </div>
-                 <button type="submit" className="glass-btn" style={{ padding: '16px', borderColor: '#F59E0B', color: '#F59E0B', background: 'rgba(245,158,11,0.1)', fontWeight: 'bold', textShadow: '0 0 10px rgba(245,158,11,0.5)' }}>[ RETIRAR 🔥 ]</button>
+                 <button type="submit" className="glass-btn" style={{ padding: '16px', borderColor: '#F59E0B', color: '#F59E0B', background: 'rgba(245,158,11,0.1)', fontWeight: 'bold', textShadow: '0 0 10px rgba(245,158,11,0.5)' }}>[ RETIRAR TODO AL 100% 🔥 ]</button>
               </form>
               <div style={{ marginTop: '20px', padding: '12px', background: 'rgba(245,158,11,0.05)', borderRadius: '8px', border: '1px dashed rgba(245,158,11,0.2)' }}>
                   <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5' }}>

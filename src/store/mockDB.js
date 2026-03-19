@@ -335,15 +335,31 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     }
 
     // 8. Pay the Developer and charge Gas
-    // Assuming 'ADMIN_DSF' is the developer's raw ID or we search for the Founder user
-    let developer = Object.values(users).find(u => u.email === 'dereckspencer1@gmail.com' || u.email === 'admin@mendigotoken.com' || u.email === 'fundador@mendigotoken.com' || u.username?.toUpperCase() === 'FUNDADOR' || u.username === 'Daniel Spencer (DSF)');
-    if (developer) {
-        developer.mdtBalance = (developer.mdtBalance || 0) + mdtForDev;
-        // Solana Gas Fee Simulation (e.g. 0.005 USDT deducted from dev's wallet per TX)
-        // Ensure developer doesn't go negative arbitrarily, though simulated
-        developer.usdtBalance = Math.max(0, (developer.usdtBalance || 0) - 0.005); 
-        users[developer.id] = developer;
+    // El Developer será independientemente 'dev@mendigotoken.com'
+    let developer = Object.values(users).find(u => u.email === 'dev@mendigotoken.com');
+    if (!developer) {
+        // Auto-create dev account if it magically wasn't there
+        const devId = 'DEV_SYS_01';
+        developer = {
+            id: devId,
+            email: 'dev@mendigotoken.com',
+            username: 'Desarrollador',
+            password: '123',
+            wallet: '0xDEV...MASTER',
+            referrerId: null,
+            mdtBalance: 0,
+            usdtBalance: 0,
+            contractStatus: 'ACTIVE',
+            contractList: [],
+            activeContractSales: 0,
+            completedContracts: 0
+        };
     }
+    
+    developer.mdtBalance = (developer.mdtBalance || 0) + mdtForDev;
+    // Solana Gas Fee Simulation (e.g. 0.005 USDT deducted from dev's USDT balance per TX)
+    developer.usdtBalance = Math.max(0, (developer.usdtBalance || 0) - 0.005); 
+    users[developer.id] = developer;
 
     // 9. Set the purchaser's status
     user.mdtBalance = (user.mdtBalance || 0);
