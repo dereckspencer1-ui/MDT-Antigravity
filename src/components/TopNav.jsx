@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Wallet, LayoutDashboard, FileText, Download } from 'lucide-react';
+import { Wallet, LayoutDashboard, FileText, Download, Sun, Moon } from 'lucide-react';
 import { resetToGenesis } from '../store/mockDB';
 
 const TopNav = ({ user }) => {
@@ -8,6 +8,13 @@ const TopNav = ({ user }) => {
   const prevBalance = React.useRef(user?.mdtBalance || 0);
   const navigate = useNavigate();
   const location = useLocation();
+  const [isProTheme, setIsProTheme] = useState(localStorage.getItem('mdt_theme') === 'pro');
+
+  useEffect(() => {
+    const handleTheme = () => setIsProTheme(localStorage.getItem('mdt_theme') === 'pro');
+    window.addEventListener('theme-changed', handleTheme);
+    return () => window.removeEventListener('theme-changed', handleTheme);
+  }, []);
 
   // Detect balance changes and trigger floating animation
   useEffect(() => {
@@ -131,6 +138,31 @@ const TopNav = ({ user }) => {
                   );
                 })}
             </div>
+
+            {/* THEME TOGGLE */}
+            <button 
+                onClick={() => {
+                    const newTheme = isProTheme ? 'dark' : 'pro';
+                    localStorage.setItem('mdt_theme', newTheme);
+                    window.dispatchEvent(new Event('theme-changed'));
+                }}
+                className="glass-btn"
+                style={{
+                    padding: '8px 12px',
+                    background: isProTheme ? 'rgba(109, 40, 217, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+                    border: `1px solid ${isProTheme ? 'rgba(139, 92, 246, 0.5)' : 'rgba(255, 255, 255, 0.2)'}`,
+                    color: isProTheme ? '#6d28d9' : '#fff',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 'none',
+                    cursor: 'pointer'
+                }}
+                title={isProTheme ? "Modo Oscuro (MDT Clásico)" : "Modo Claro (MDT PRO)"}
+            >
+                {isProTheme ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
 
             { (user?.email === 'dereckspencer1@gmail.com' || user?.email === 'admin@mendigotoken.com' || user?.email === 'fundador@mendigotoken.com' || user?.username?.toUpperCase() === 'FUNDADOR') && (
                 <button 

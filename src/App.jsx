@@ -18,6 +18,18 @@ function App() {
     // 0. Pull global entire network tree from cloud on app boot
     syncUsersFromSupabase();
 
+    // Theme initialization
+    const savedTheme = localStorage.getItem('mdt_theme') || 'dark';
+    if (savedTheme === 'pro') document.body.classList.add('theme-pro');
+    else document.body.classList.remove('theme-pro');
+
+    const handleThemeChange = () => {
+      const theme = localStorage.getItem('mdt_theme');
+      if (theme === 'pro') document.body.classList.add('theme-pro');
+      else document.body.classList.remove('theme-pro');
+    };
+    window.addEventListener('theme-changed', handleThemeChange);
+
     // 1. Listen for user changes in localStorage (auth simulation)
     const handleStorageChange = () => {
       setUser(getCurrentUser());
