@@ -258,22 +258,17 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
   }
 
   if (isGenesis) {
-    // 1. Genesis Block Logic (Fundador)
-    // To set the initial price to $1.00, an injection of 30 USDT should mint 30 MDT.
     const MINT_AMOUNT = 30; // 30 MDT
     const USDT_FUND = 30;   // 30 USDT
-    
     globals.minted += MINT_AMOUNT;
     globals.circulating += MINT_AMOUNT;
     globals.usdtVault += USDT_FUND;
-    globals.activeContracts = 0; // Starts from absolute zero
+    globals.activeContracts = 0; 
     
-    setGlobalState(globals);
-
     user.mdtBalance = (user.mdtBalance || 0) + MINT_AMOUNT;
     user.contractStatus = 'ACTIVE';
     user.daysRemaining = 365;
-    user.activeContractSales = 0; // Starts with 0 sales organically
+    user.activeContractSales = 0; 
 
     // Fill the list with the Founder's wallet for all 5 positions
     const newList = [
@@ -285,7 +280,6 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     ];
     user.contractList = newList;
     
-    // Explicitly update the user in the database list
     users[userId] = user;
     localStorage.setItem('mdt_users', JSON.stringify(users));
     
@@ -296,44 +290,26 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
 
   } else {
     // Phase 2: Dynamic Value Math for Regular Purchase
-
-    // 1. Calculate the exact real-time price BEFORE adding the new USDT
-    // Formula: MDT Circulating / USDT Token In Vault
-    const currentPrice = globals.usdtVault > 0 && globals.circulating > 0 
-        ? globals.circulating / globals.usdtVault 
-        : 1.00; // Fallback to $1.00
-
-    // 2. The user injects exactly 6 USDT.
+    const currentPrice = globals.usdtVault > 0 && globals.circulating > 0 ? globals.circulating / globals.usdtVault : 1.00;
     const USDT_INJECTED = 6.00;
-    
-    // 3. How many MDT does 6 USDT buy right now based on the formula?
-    // Since Price = MDT / USDT, then MDT to mint = USDT_INJECTED * Price
-    // Wait, if Price = Circulating / Vault = 36/36 = 1. Then 6 * 1 = 6 MDT.
-    // If Vault = 36, Circulating = 72. Price = 72/36 = 2. MDT to mint for 6 USDT = 6 * 2 = 12 MDT.
     const TOKENS_MINTED = USDT_INJECTED * currentPrice;
 
-    // 4. Update Global Metrics
     globals.minted += TOKENS_MINTED;
     globals.circulating += TOKENS_MINTED;
     globals.usdtVault += USDT_INJECTED;
     globals.activeContracts = (globals.activeContracts || 0) + 1;
     
-    // 5. Distribution Math based on EXACT USD value equivalent
-    // Since Price = MDT/USDT, MDT equivalent = USD value * Price
-    const mdtPerUser = 1.00 * currentPrice;  // $1 equivalent per user in the list
-    const mdtForDev = 0.50 * currentPrice;   // $0.50 equivalent for dev (Gas, Retornos, Proyectos)
-    const mdtForLp = 0.50 * currentPrice;    // $0.50 equivalent for LP
+    const mdtPerUser = 1.00 * currentPrice;
+    const mdtForDev = 0.50 * currentPrice;
+    const mdtForLp = 0.50 * currentPrice;
 
     globals.lpBalance = (globals.lpBalance || 0) + mdtForLp;
-    setGlobalState(globals);
 
-    // 6. Time reduction logic
     const timeReductionRatio = TOKENS_MINTED / 182465.75;
     Object.keys(users).forEach(k => {
       users[k].daysRemaining = Math.max(0, users[k].daysRemaining - timeReductionRatio);
     });
 
-    // 7. Pay the list of 5 their commissions
     inheritedList.forEach(pos => {
         const match = Object.values(users).find(u => u.username === pos.user || u.wallet === pos.wallet);
         if(match) {
@@ -341,54 +317,32 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
         }
     });
 
-    // 7.1 Increment the direct referrer's sales counter based entirely on the affiliate link used
     if (user.referrerId) {
-        // Fallback checks just in case the referrer is stored by ID, wallet, or username
-        let directReferrer = Object.values(users).find(u => 
-            u.id === user.referrerId || 
-            u.wallet === user.referrerId || 
-            u.username === user.referrerId
-        );
-        
+        let directReferrer = Object.values(users).find(u => u.id === user.referrerId || u.wallet === user.referrerId || u.username === user.referrerId);
         if (directReferrer) {
             directReferrer.activeContractSales = (directReferrer.activeContractSales || 0) + 1;
             users[directReferrer.id] = directReferrer;
         }
     }
 
-    // 8. Pay the Developer and charge Gas
-    // El Developer será independientemente 'dev@mendigotoken.com'
     let developer = Object.values(users).find(u => u.email === 'dev@mendigotoken.com');
     if (!developer) {
-        // Auto-create dev account if it magically wasn't there
-        const devId = 'DEV_SYS_01';
         developer = {
-            id: devId,
-            email: 'dev@mendigotoken.com',
-            username: 'Desarrollador',
-            password: '123',
-            wallet: '0xDEV...MASTER',
-            referrerId: null,
-            mdtBalance: 0,
-            usdtBalance: 0,
-            contractStatus: 'ACTIVE',
-            contractList: [],
-            activeContractSales: 0,
-            completedContracts: 0
+            id: 'DEV_SYS_01', email: 'dev@mendigotoken.com', username: 'Desarrollador',
+            password: '123', wallet: '0xDEV...MASTER', referrerId: null,
+            mdtBalance: 0, usdtBalance: 0, contractStatus: 'ACTIVE',
+            contractList: [], activeContractSales: 0, completedContracts: 0
         };
     }
     
     developer.mdtBalance = (developer.mdtBalance || 0) + mdtForDev;
-    // Solana Gas Fee Simulation (e.g. 0.005 USDT deducted from dev's USDT balance per TX)
     developer.usdtBalance = Math.max(0, (developer.usdtBalance || 0) - 0.005); 
     users[developer.id] = developer;
 
-    // 9. Set the purchaser's status
     user.mdtBalance = (user.mdtBalance || 0);
     user.contractStatus = 'ACTIVE';
     user.daysRemaining = 365;
     
-    // 10. Shift List (FIFO)
     const newList = [
         { position: 1, user: inheritedList[1]?.user || 'Unknown', wallet: inheritedList[1]?.wallet || '0x...' },
         { position: 2, user: inheritedList[2]?.user || 'Unknown', wallet: inheritedList[2]?.wallet || '0x...' },
@@ -397,15 +351,19 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
         { position: 5, user: user.username, wallet: user.wallet }
     ];
     user.contractList = newList;
+    users[userId] = user;
+    localStorage.setItem('mdt_users', JSON.stringify(users));
   }
 
-  localStorage.setItem('mdt_users', JSON.stringify(users));
-  
   // Sincronizar el usuario logueado en pantalla para que reciba el pago en su UI al instante
   const currentUser = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
   if (currentUser && currentUser.id && users[currentUser.id]) {
       localStorage.setItem('mdt_current_user', JSON.stringify(users[currentUser.id]));
   }
+
+  // AHORA QUE mdt_users ESTÁ FORMALMENTE GUARDADO Y COMPLETO EN LOCALSTORAGE...
+  // ...SUBIMOS EL ESTADO DE CONTADORES A SUPABASE JUNTO CON EL GRAN JSON
+  setGlobalState(globals);
 
   return true;
 };
@@ -438,9 +396,11 @@ export const withdrawMDT = (userId, amount) => {
     user.mdtBalance -= amount;
     user.usdtBalance = (user.usdtBalance || 0) + usdtCredit;
 
-    setGlobalState(globals);
     localStorage.setItem('mdt_users', JSON.stringify(users));
     localStorage.setItem('mdt_current_user', JSON.stringify(user));
+    
+    // Ahora enviamos el global (incluyendo el JSON actualizado)
+    setGlobalState(globals);
     
     // Dispatch event to force React to update the user's live balance
     window.dispatchEvent(new Event('storage'));
@@ -463,12 +423,15 @@ export const sendMDT = (senderId, receiverEmail, amount) => {
     // If it's the sender's first transfer, trigger the shift list logic (Simulated here as a flag)
     if(!sender.hasDisplaced) {
         sender.hasDisplaced = true;
-        // Logic to move DSF to pos 4 and shift is handled inside buyCourse inherently,
-        // but can be added here if sending MDT also triggers a network shift for the user.
+        // Logic to move DSF to pos 4 and shift is handled inside buyCourse inherently.
     }
 
     localStorage.setItem('mdt_users', JSON.stringify(users));
     localStorage.setItem('mdt_current_user', JSON.stringify(sender));
+    
+    // Forzar guardado transparente a la red (Supabase)
+    const globals = JSON.parse(localStorage.getItem('mdt_global_state') || '{}');
+    syncGlobalStateToSupabase(globals);
     
     // Dispatch event to force React to update the user's live balance
     window.dispatchEvent(new Event('storage'));
