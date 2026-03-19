@@ -150,13 +150,11 @@ const Dashboard = ({ user }) => {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px', padding: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                   <div>
-                      <h1 style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                          <span style={{ color: 'var(--text-main)', textShadow: '0 0 15px rgba(245,158,11,0.3)' }}>
-                              @{user.username || 'Usuario'}
-                          </span>
+                      <h1 style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '2px', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                          <span style={{ color: 'var(--primary)', textShadow: '0 0 15px rgba(0,255,100,0.4)' }}>DASHBOARD</span>
                       </h1>
-                      <div style={{ fontSize: '18px', color: 'var(--primary)', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '8px', fontWeight: '800' }}>
-                          Saldo Disponible: {(user.mdtBalance || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} MDT
+                      <div style={{ fontSize: '14px', color: '#F59E0B', letterSpacing: '3px', textTransform: 'uppercase', marginTop: '4px', fontWeight: '800' }}>
+                          MENDIGOTOKEN FACTORY V4.0
                       </div>
                   </div>
               </div>

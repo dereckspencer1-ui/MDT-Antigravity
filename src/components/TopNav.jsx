@@ -83,8 +83,13 @@ const TopNav = ({ user }) => {
                     filter: 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.8))'
                 }} />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/mdt-logo-white.png" alt="MDT PRO" style={{ height: '32px' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <h1 style={{ fontSize: '18px', margin: 0, fontWeight: '900', letterSpacing: '1px', color: 'var(--foreground)' }}>
+                    @{user?.username || 'Usuario'}
+                </h1>
+                <span style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: 'bold' }}>
+                    {(user?.mdtBalance || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} MDT
+                </span>
             </div>
         </div>
 
