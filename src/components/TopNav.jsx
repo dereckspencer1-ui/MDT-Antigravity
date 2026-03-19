@@ -132,16 +132,18 @@ const TopNav = ({ user }) => {
                 })}
             </div>
 
-            <button 
-                onClick={() => {
-                    if (window.confirm('¿Borrar toda la red y volver al estado previo al Génesis?')) {
-                        localStorage.clear();
-                        window.location.href = '/registro';
-                    }
-                }} 
-                style={{ background: 'rgba(255,0,0,0.2)', border: '1px solid #ff4444', color: '#ff4444', cursor: 'pointer', fontSize: '12px', padding: '6px 12px', borderRadius: '4px' }}>
-                ⚠️ PURGAR RED ⚠️
-            </button>
+            { (user?.email === 'dereckspencer1@gmail.com' || user?.email === 'admin@mendigotoken.com' || user?.email === 'fundador@mendigotoken.com' || user?.username?.toUpperCase() === 'FUNDADOR') && (
+                <button 
+                    onClick={() => {
+                        if (window.confirm('¿Borrar toda la red y volver al estado previo al Génesis?')) {
+                            localStorage.clear();
+                            window.location.href = '/registro';
+                        }
+                    }} 
+                    style={{ background: 'rgba(255,0,0,0.2)', border: '1px solid #ff4444', color: '#ff4444', cursor: 'pointer', fontSize: '12px', padding: '6px 12px', borderRadius: '4px' }}>
+                    ⚠️ PURGAR RED ⚠️
+                </button>
+            )}
             <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px', transition: 'color 0.2s', padding: '8px' }}>
                 Cerrar Sesión
             </button>
