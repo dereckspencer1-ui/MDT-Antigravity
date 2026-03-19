@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getUserByEmail } from '../store/mockDB';
-import { LogIn, Sun, Moon } from 'lucide-react';
+import { LogIn } from 'lucide-react';
+import YinYang from '../components/YinYang';
 
 const Home = () => {
   const [email, setEmail] = useState('');
@@ -39,11 +40,10 @@ const Home = () => {
                 }}
                 className="glass-btn"
                 style={{
-                    padding: '8px 12px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: '#fff',
-                    borderRadius: '8px',
+                    padding: '8px',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -52,7 +52,7 @@ const Home = () => {
                 }}
                 title="Cambiar Diseño"
             >
-                {document.body.classList.contains('theme-pro') ? <Moon size={20} /> : <Sun size={20} />}
+                <YinYang size={36} isPro={document.body.classList.contains('theme-pro')} />
             </button>
 
           <Link to="/login" className="glass-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>

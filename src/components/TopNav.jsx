@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Wallet, LayoutDashboard, FileText, Download, Sun, Moon } from 'lucide-react';
+import { Wallet, LayoutDashboard, FileText, Download } from 'lucide-react';
+import YinYang from './YinYang';
 import { resetToGenesis } from '../store/mockDB';
 
 const TopNav = ({ user }) => {
@@ -149,10 +150,9 @@ const TopNav = ({ user }) => {
                 className="glass-btn"
                 style={{
                     padding: '8px 12px',
-                    background: isProTheme ? 'rgba(109, 40, 217, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-                    border: `1px solid ${isProTheme ? 'rgba(139, 92, 246, 0.5)' : 'rgba(255, 255, 255, 0.2)'}`,
-                    color: isProTheme ? '#6d28d9' : '#fff',
-                    borderRadius: '8px',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -161,7 +161,7 @@ const TopNav = ({ user }) => {
                 }}
                 title={isProTheme ? "Modo Oscuro (MDT Clásico)" : "Modo Claro (MDT PRO)"}
             >
-                {isProTheme ? <Moon size={20} /> : <Sun size={20} />}
+                <YinYang size={32} isPro={isProTheme} />
             </button>
 
             { (user?.email === 'dereckspencer1@gmail.com' || user?.email === 'admin@mendigotoken.com' || user?.email === 'fundador@mendigotoken.com' || user?.username?.toUpperCase() === 'FUNDADOR') && (
