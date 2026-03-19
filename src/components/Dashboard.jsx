@@ -74,7 +74,7 @@ const Dashboard = ({ user }) => {
 
   const handleStressTest = () => {
       // Only the Founder can run this full simulation
-      const isFounder = user.id === 'ADMIN_DSF' || user.username === 'FUNDADOR' || user.email === 'fundador@mendigotoken.com';
+      const isFounder = user.email === 'admin@mendigotoken.com' || user.email === 'fundador@mendigotoken.com' || user.username?.toUpperCase() === 'FUNDADOR';
       if (!isFounder) {
           setMsg({ type: 'error', text: '⛔ Simulación no autorizada. Solo el Fundador puede inyectar tráfico.' });
           return;
@@ -158,7 +158,7 @@ const Dashboard = ({ user }) => {
               </div>
 
               {/* MASSIVE STRESS TEST BUTTON (ONLY FOR FOUNDER) */}
-              {(user.id === 'ADMIN_DSF' || user.username === 'FUNDADOR' || user.email === 'fundador@mendigotoken.com') && (
+              {(user.email === 'admin@mendigotoken.com' || user.email === 'fundador@mendigotoken.com' || user.username?.toUpperCase() === 'FUNDADOR') && (
                   <button 
                       onClick={handleStressTest} 
                       className="glass-btn"
