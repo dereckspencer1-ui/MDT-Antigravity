@@ -18,6 +18,7 @@ const Dashboard = ({ user }) => {
       { name: formatTime(), price: Number(getGlobalMetrics().currentPrice) }
   ]);
   const [msg, setMsg] = useState({ type: '', text: '' });
+  const [testUsed, setTestUsed] = useState(false);
 
   useEffect(() => {
     const fetchSupabaseMetrics = async () => {
@@ -82,6 +83,7 @@ const Dashboard = ({ user }) => {
       // Clear any existing simulation
       if (window.matrixInterval) clearInterval(window.matrixInterval);
       
+      setTestUsed(true);
       setMsg({ type: 'success', text: '⚡ SIMULACIÓN MATRIZ 6x6 INICIADA: Llenando 9,330 Contratos ⚡' });
       
       let purchasesMade = 0;
@@ -160,10 +162,11 @@ const Dashboard = ({ user }) => {
                   <button 
                       onClick={handleStressTest} 
                       className="glass-btn"
+                      disabled={testUsed}
                       style={{ 
-                          background: 'rgba(245, 158, 11, 0.1)', 
-                          border: '2px solid #F59E0B', 
-                          cursor: 'pointer', 
+                          background: testUsed ? 'rgba(100, 100, 100, 0.2)' : 'rgba(245, 158, 11, 0.1)', 
+                          border: testUsed ? '2px solid #555' : '2px solid #F59E0B', 
+                          cursor: testUsed ? 'not-allowed' : 'pointer', 
                           padding: '16px 32px', 
                           borderRadius: '12px',
                           display: 'flex',
@@ -171,17 +174,18 @@ const Dashboard = ({ user }) => {
                           gap: '12px',
                           fontSize: '18px',
                           fontWeight: '900',
-                          color: '#F59E0B',
-                          boxShadow: '0 0 30px rgba(245, 158, 11, 0.3)',
+                          color: testUsed ? '#888' : '#F59E0B',
+                          boxShadow: testUsed ? 'none' : '0 0 30px rgba(245, 158, 11, 0.3)',
                           transition: 'all 0.2s ease',
-                          textTransform: 'uppercase'
+                          textTransform: 'uppercase',
+                          opacity: testUsed ? 0.6 : 1
                       }} 
                       title="SIMULAR MATRIZ 6x6 REAL"
-                      onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.3)'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                      onMouseOver={(e) => { if(!testUsed) { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.3)'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
+                      onMouseOut={(e) => { if(!testUsed) { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)'; e.currentTarget.style.transform = 'scale(1)'; } }}
                   >
-                      <Zap size={28} color="#F59E0B" style={{ filter: 'drop-shadow(0 0 8px #F59E0B)' }} />
-                      INICIAR MATRIZ 6x6 (9330)
+                      <Zap size={28} color={testUsed ? '#555' : '#F59E0B'} style={{ filter: testUsed ? 'none' : 'drop-shadow(0 0 8px #F59E0B)' }} />
+                      {testUsed ? 'SIMULACIÓN REALIZADA' : 'INICIAR MATRIZ 6x6 (9330)'}
                   </button>
               )}
           </div>

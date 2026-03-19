@@ -9,9 +9,7 @@ const syncGlobalStateToSupabase = async (globals) => {
             mdt_circulante: globals.circulating,
             mdt_balance: globals.usdtVault,
             ventas_globales: globals.activeContracts,
-            contador_fomo: fomoDaysRemaining,
-            mdt_acunado: globals.minted,
-            mdt_quemado: globals.burned,
+            contador_fomo: fomoDaysRemaining
         }).eq('id', 1);
     } catch (e) {
         console.error("Supabase sync failed", e);
