@@ -254,59 +254,72 @@
 /* ========================================= */
 body.theme-pro {
   --background: 210 20% 98%;
-  --foreground: 220 30% 15%;
-  --glass-bg: rgba(255, 255, 255, 0.75);
+  --foreground: 220 30% 10%; /* Texto casi negro/azul muy oscuro */
+  --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-bg-hover: rgba(167, 139, 250, 0.1);
-  --glass-border: rgba(167, 139, 250, 0.25);
-  --glass-highlight: rgba(167, 139, 250, 0.15);
+  --glass-border: rgba(167, 139, 250, 0.3);
+  --glass-highlight: rgba(167, 139, 250, 0.2);
   
   --primary: 262 83% 65%; /* Beautiful Purple */
   --accent: 155 100% 40%; /* Deep Emerald */
-  --text-main: #6d28d9;
-  --text-muted: #8b5cf6;
+  --text-main: #4c1d95; /* Morado hiper oscuro para textos fuertes */
+  --text-muted: #6d28d9;
 
   --neon-glow: 0 0 15px rgba(139, 92, 246, 0.1);
   --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05), 0 0 20px rgba(139, 92, 246, 0.08);
   
-  background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.05), transparent 50%),
-              radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.1), transparent 50%),
-              hsl(var(--background));
-  color: hsl(var(--foreground));
+  /* Logotipo gigante de marca de agua blanca usando blend mode */
+  background: 
+    linear-gradient(rgba(241, 245, 249, 0.93), rgba(241, 245, 249, 0.93)),
+    url('/Mendigotoken-logo.png') center center / 60% no-repeat fixed,
+    hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 body.theme-pro .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--card-shadow);
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--card-shadow) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Forzar que los textos dentro de componentes que usualmente son blancos ahora sean oscuros */
+body.theme-pro div, 
+body.theme-pro p, 
+body.theme-pro span, 
+body.theme-pro h1, 
+body.theme-pro h2, 
+body.theme-pro h3, 
+body.theme-pro h4 {
+  text-shadow: none !important;
 }
 
 body.theme-pro .glass-input {
-  background: rgba(255, 255, 255, 0.6);
-  color: #1e293b !important;
-  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  font-weight: 600 !important;
 }
 
 body.theme-pro .glass-input::placeholder {
-  color: #94a3b8;
+  color: #64748b !important;
 }
 
 body.theme-pro .glass-input:focus {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+  background: #ffffff !important;
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3) !important;
 }
 
 body.theme-pro .glass-btn {
   background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%) !important;
-  color: #fff !important;
-  text-shadow: none;
-  box-shadow: 0 6px 0 #6d28d9, 0 10px 15px rgba(139, 92, 246, 0.2) !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
+  box-shadow: 0 6px 0 #6d28d9, 0 10px 15px rgba(139, 92, 246, 0.3) !important;
 }
 
 body.theme-pro .glass-btn:hover {
-  filter: brightness(1.1);
-}
-
-body.theme-pro h1, body.theme-pro h2, body.theme-pro h3, body.theme-pro h4 {
-  text-shadow: none !important;
+  filter: brightness(1.1) !important;
 }
