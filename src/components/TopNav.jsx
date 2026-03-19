@@ -4,21 +4,34 @@ import { Wallet, LayoutDashboard, FileText, Download } from 'lucide-react';
 import { resetToGenesis } from '../store/mockDB';
 
 const TopNav = ({ user }) => {
-  const [animations, setAnimations] = useState([]);
+  const [animations, setAnimations] = useState([]); // [{id, type, amount}]
+  const prevBalance = React.useRef(user?.mdtBalance || 0);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Detect balance increases and trigger floating animation
+  // Detect balance changes and trigger floating animation
   useEffect(() => {
-    if (user && user.mdtBalance) {
-      // Create a unique ID for the animation
-      const id = Date.now();
-      setAnimations(prev => [...prev, id]);
+    if (user && user.mdtBalance !== undefined) {
+      const currentLabel = (user.mdtBalance || 0);
+      const previousLabel = prevBalance.current;
       
-      // Remove animation from state after it finishes (1s)
-      setTimeout(() => {
-        setAnimations(prev => prev.filter(animId => animId !== id));
-      }, 1000);
+      const diff = currentLabel - previousLabel;
+      
+      if (Math.abs(diff) > 0.001) {
+        // Create a unique ID for the animation
+        const id = Date.now();
+        const type = diff > 0 ? 'gain' : 'loss';
+        const absDiff = Math.abs(diff);
+        
+        setAnimations(prev => [...prev, { id, type, amount: absDiff }]);
+        
+        // Remove animation from state after it finishes (1s)
+        setTimeout(() => {
+          setAnimations(prev => prev.filter(anim => anim.id !== id));
+        }, 1000);
+      }
+      
+      prevBalance.current = currentLabel;
     }
   }, [user?.mdtBalance]);
 
@@ -96,24 +109,27 @@ const TopNav = ({ user }) => {
                 </div>
                 
                 {/* Render active floating animations */}
-                {animations.map(id => (
-                    <div key={id} style={{
+                {animations.map(anim => {
+                  const isGain = anim.type === 'gain';
+                  return (
+                    <div key={anim.id} style={{
                         position: 'absolute',
                         top: 0,
                         right: '50%',
                         transform: 'translateX(50%)',
-                        color: '#00E676',
+                        color: isGain ? '#00E676' : '#EF4444',
                         fontWeight: '900',
                         fontSize: '18px',
-                        textShadow: '0 0 10px rgba(0,255,100,0.8)',
+                        textShadow: isGain ? '0 0 10px rgba(0,255,100,0.8)' : '0 0 10px rgba(239,68,68,0.8)',
                         pointerEvents: 'none',
                         animation: 'floatUpAndFade 1s ease-out forwards',
                         zIndex: 100,
                         whiteSpace: 'nowrap'
                     }}>
-                        +$1.00 USD
+                        {isGain ? '+' : '-'}${anim.amount.toFixed(2)} USD
                     </div>
-                ))}
+                  );
+                })}
             </div>
 
             <button 
