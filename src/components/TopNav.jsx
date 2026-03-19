@@ -73,12 +73,6 @@ const TopNav = ({ user }) => {
             <NavPill label="Dashboard" icon={<LayoutDashboard size={16} />} isActive={currentPath === '/dashboard'} path="/dashboard" />
             <NavPill label="Whitepaper" icon={<FileText size={16} />} isActive={currentPath === '/whitepaper'} path="/whitepaper" />
             <NavPill label="Retiro" icon={<Download size={16} />} isActive={currentPath === '/red'} path="/red" />
-            <button 
-                onClick={() => { resetToGenesis(); }} 
-                style={{ marginLeft: '12px', padding: '6px 12px', background: 'rgba(239, 68, 68, 0.2)', color: '#EF4444', border: '1px solid #EF4444', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
-            >
-                RESETEAR SISTEMA
-            </button>
         </div>
 
         {/* Wallet & Auth Control */}

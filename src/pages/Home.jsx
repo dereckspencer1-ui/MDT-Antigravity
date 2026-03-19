@@ -48,28 +48,6 @@ const Home = () => {
             Continuar
           </button>
         </form>
-
-        {/* Developer Reset Button */}
-        <div style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-          <button 
-            type="button" 
-            onClick={() => { localStorage.clear(); window.location.reload(); }}
-            style={{ 
-              background: 'rgba(239, 68, 68, 0.1)', 
-              border: '1px solid rgba(239, 68, 68, 0.3)', 
-              color: 'var(--danger)', 
-              padding: '8px 16px', 
-              borderRadius: '8px', 
-              cursor: 'pointer', 
-              fontSize: '12px',
-              transition: 'all 0.2s'
-            }}
-            onMouseOver={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.2)'}
-            onMouseOut={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.1)'}
-          >
-            ⚠️ Borrar Datos
-          </button>
-        </div>
       </div>
     </div>
   );
