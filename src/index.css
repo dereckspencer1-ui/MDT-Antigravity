@@ -270,7 +270,7 @@ body.theme-pro {
   
   /* Logotipo gigante vívido (sin marcas de agua) */
   background: 
-    url('/Mendigotoken-logo.png') center center / 80% no-repeat fixed,
+    url('/Mendigotoken-logo.jpg') center center / 95% no-repeat fixed,
     #ffffff !important;
   color: hsl(var(--foreground)) !important;
 }
