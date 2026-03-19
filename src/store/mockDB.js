@@ -316,6 +316,7 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     globals.minted += TOKENS_MINTED;
     globals.circulating += TOKENS_MINTED;
     globals.usdtVault += USDT_INJECTED;
+    globals.activeContracts = (globals.activeContracts || 0) + 1;
     
     // 5. Distribution Math based on EXACT USD value equivalent
     // Since Price = MDT/USDT, MDT equivalent = USD value * Price
