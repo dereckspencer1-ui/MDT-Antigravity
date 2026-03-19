@@ -147,7 +147,6 @@ const TopNav = ({ user }) => {
                     localStorage.setItem('mdt_theme', newTheme);
                     window.dispatchEvent(new Event('theme-changed'));
                 }}
-                className="glass-btn"
                 style={{
                     padding: '8px 12px',
                     background: 'transparent',

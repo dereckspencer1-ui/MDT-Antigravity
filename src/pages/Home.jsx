@@ -38,7 +38,6 @@ const Home = () => {
                     localStorage.setItem('mdt_theme', isPro ? 'dark' : 'pro');
                     window.dispatchEvent(new Event('theme-changed'));
                 }}
-                className="glass-btn"
                 style={{
                     padding: '8px',
                     background: 'transparent',
