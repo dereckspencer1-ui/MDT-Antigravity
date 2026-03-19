@@ -11,7 +11,7 @@ import Philosophy from '../components/Philosophy'; // Will act as Whitepaper
 
 const Desktop = ({ user }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-darker)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'transparent' }}>
       {/* Universal Top Navigation */}
       <TopNav user={user} />
 
