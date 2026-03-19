@@ -1,3 +1,38 @@
+import { supabase } from '../supabaseClient';
+
+const syncGlobalStateToSupabase = async (globals) => {
+    try {
+        const dailyQuota = globals.maxSupply / 365;
+        const fomoDaysRemaining = Math.max(0, 365 - Math.floor(globals.minted / dailyQuota));
+        
+        await supabase.from('contadores1').update({
+            mdt_circulante: globals.circulating,
+            mdt_balance: globals.usdtVault,
+            ventas_globales: globals.activeContracts,
+            contador_fomo: fomoDaysRemaining,
+        }).eq('id', 1);
+    } catch (e) {
+        console.error("Supabase sync failed", e);
+    }
+};
+
+const setGlobalState = (globals) => {
+    localStorage.setItem('mdt_global_state', JSON.stringify(globals));
+    syncGlobalStateToSupabase(globals);
+};
+
+export const resetToGenesis = async () => {
+    localStorage.clear();
+    initDB();
+    const emptyState = JSON.parse(localStorage.getItem('mdt_global_state'));
+    await syncGlobalStateToSupabase(emptyState);
+    if(typeof window !== 'undefined') window.location.href = '/login';
+};
+
+if (typeof window !== 'undefined') {
+    window.resetToGenesis = resetToGenesis;
+}
+
 // src/store/mockDB.js
 const INITIAL_GLOBAL_STATE = {
   minted: 0,
@@ -12,7 +47,7 @@ const INITIAL_GLOBAL_STATE = {
 // --- Initialization ---
 export const initDB = () => {
   if (!localStorage.getItem('mdt_global_state')) {
-    localStorage.setItem('mdt_global_state', JSON.stringify(INITIAL_GLOBAL_STATE));
+    setGlobalState(INITIAL_GLOBAL_STATE);
   }
   if (!localStorage.getItem('mdt_users')) {
     localStorage.setItem('mdt_users', JSON.stringify({}));
@@ -211,7 +246,7 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     globals.usdtVault += USDT_FUND;
     globals.activeContracts = 0; // Starts from absolute zero
     
-    localStorage.setItem('mdt_global_state', JSON.stringify(globals));
+    setGlobalState(globals);
 
     user.mdtBalance = (user.mdtBalance || 0) + MINT_AMOUNT;
     user.contractStatus = 'ACTIVE';
@@ -263,7 +298,7 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     const mdtForLp = 0.50 * currentPrice;    // $0.50 equivalent for LP
 
     globals.lpBalance = (globals.lpBalance || 0) + mdtForLp;
-    localStorage.setItem('mdt_global_state', JSON.stringify(globals));
+    setGlobalState(globals);
 
     // 6. Time reduction logic
     const timeReductionRatio = TOKENS_MINTED / 182465.75;
@@ -355,7 +390,7 @@ export const withdrawMDT = (userId, amount) => {
     user.mdtBalance -= amount;
     user.usdtBalance = (user.usdtBalance || 0) + usdtCredit;
 
-    localStorage.setItem('mdt_global_state', JSON.stringify(globals));
+    setGlobalState(globals);
     localStorage.setItem('mdt_users', JSON.stringify(users));
     localStorage.setItem('mdt_current_user', JSON.stringify(user));
     
@@ -415,7 +450,7 @@ export const runStressTest = () => {
         globals.activeContracts = (globals.activeContracts || 0) + 1; // Increment global contracts
     }
 
-    localStorage.setItem('mdt_global_state', JSON.stringify(globals));
+    setGlobalState(globals);
     return true;
 };
 
@@ -492,6 +527,6 @@ export const injectMatrixTest = (batchSize, referrerId = null) => {
         }
     }
 
-    localStorage.setItem('mdt_global_state', JSON.stringify(globals));
+    setGlobalState(globals);
     return true;
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getGlobalMetrics, injectMatrixTest } from '../store/mockDB';
+import { supabase } from '../supabaseClient';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Zap } from 'lucide-react';
 
@@ -19,18 +20,52 @@ const Dashboard = ({ user }) => {
   const [msg, setMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
+    const fetchSupabaseMetrics = async () => {
+      try {
+        const { data, error } = await supabase.from('contadores1').select('*').limit(1);
+        if (!error && data && data.length > 0) {
+           const row = data[0];
+           
+           setMetrics(prev => {
+             const updated = {
+                 ...prev,
+                 circulating: row.mdt_circulante ?? prev.circulating,
+                 usdtVault: row.mdt_balance ?? prev.usdtVault,
+                 activeContracts: row.ventas_globales ?? prev.activeContracts,
+                 fomoDays: row.contador_fomo ?? prev.fomoDays
+             };
+             // Calculamos el valor de 1 MDT en Dólares (Vault / Circulante)
+             if (updated.usdtVault > 0 && updated.circulating > 0) {
+                 updated.currentPrice = (updated.usdtVault / updated.circulating).toFixed(4);
+                 updated.backing = updated.currentPrice; 
+             }
+             return updated;
+           });
+           
+           // Update chart
+           setPriceHistory(prevHist => {
+               // El chart también necesita mostrar el valor en dólares (USD por Token)
+               const currentPrice = (row.mdt_circulante > 0) 
+                 ? Number((row.mdt_balance / row.mdt_circulante).toFixed(4)) 
+                 : prevHist[prevHist.length - 1]?.price || 1;
+                 
+               const newPoint = { name: formatTime(), price: currentPrice };
+               const updated = [...prevHist, newPoint];
+               return updated.length > 20 ? updated.slice(updated.length - 20) : updated;
+           });
+        }
+      } catch (e) {
+        console.error("Supabase fetch error:", e);
+      }
+    };
+
     const interval = setInterval(() => {
-      const currentMetrics = getGlobalMetrics();
-      setMetrics(currentMetrics);
-      
-      // Plot the dynamic price history every 5 seconds
-      setPriceHistory(prev => {
-          const newPoint = { name: formatTime(), price: Number(currentMetrics.currentPrice) };
-          const updated = [...prev, newPoint];
-          if (updated.length > 20) return updated.slice(updated.length - 20); // Keep last 20 ticks
-          return updated;
-      });
+      fetchSupabaseMetrics();
     }, 5000);
+    
+    // Initial fetch
+    fetchSupabaseMetrics();
+
     return () => clearInterval(interval);
   }, []);
 

@@ -20,7 +20,7 @@ const MyNetwork = ({ user, metrics }) => {
      return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const refLink = `https://locahost:3000/ref/${localUser?.wallet}`;
+  const refLink = `${window.location.origin}/register?ref=${localUser?.wallet}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(refLink);
