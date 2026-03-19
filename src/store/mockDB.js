@@ -331,7 +331,7 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
 
     // 8. Pay the Developer and charge Gas
     // Assuming 'ADMIN_DSF' is the developer's raw ID or we search for the Founder user
-    let developer = Object.values(users).find(u => u.username === 'FUNDADOR' || u.username === 'Daniel Spencer (DSF)');
+    let developer = Object.values(users).find(u => u.email === 'dereckspencer1@gmail.com' || u.email === 'admin@mendigotoken.com' || u.email === 'fundador@mendigotoken.com' || u.username?.toUpperCase() === 'FUNDADOR' || u.username === 'Daniel Spencer (DSF)');
     if (developer) {
         developer.mdtBalance = (developer.mdtBalance || 0) + mdtForDev;
         // Solana Gas Fee Simulation (e.g. 0.005 USDT deducted from dev's wallet per TX)
@@ -461,7 +461,7 @@ export const injectMatrixTest = (batchSize, referrerId = null) => {
     let users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
     
     // Find founder to credit commissions
-    let founder = Object.values(users).find(u => u.username === 'FUNDADOR' || u.username === 'Daniel Spencer (DSF)' || u.email === 'fundador@mendigotoken.com');
+    let founder = Object.values(users).find(u => u.email === 'dereckspencer1@gmail.com' || u.email === 'admin@mendigotoken.com' || u.email === 'fundador@mendigotoken.com' || u.username?.toUpperCase() === 'FUNDADOR' || u.username === 'Daniel Spencer (DSF)');
     // Identify the direct referrer who triggered the test
     let directReferrer = referrerId ? users[referrerId] : null;
 
