@@ -25,18 +25,26 @@ const Register = () => {
     const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
-        // If a referral link is used, find the inviter
-        if (referralId) {
-            const users = getAllUsers();
-            const foundInviter = users.find(u => 
-                u.wallet === referralId || 
-                u.id === referralId || 
-                u.username.toLowerCase() === referralId.toLowerCase()
-            );
-            if (foundInviter) {
-                setInviter(foundInviter);
+        // Function to check inviter either on mount or when Supabase finishes downloading the users
+        const checkInviter = () => {
+            if (referralId) {
+                const users = getAllUsers();
+                const foundInviter = users.find(u => 
+                    u.wallet === referralId || 
+                    u.id === referralId || 
+                    u.username.toLowerCase() === referralId.toLowerCase()
+                );
+                if (foundInviter) {
+                    setInviter(foundInviter);
+                }
             }
-        }
+        };
+
+        checkInviter();
+
+        // When App.jsx finishes fetching 'usuarios_json' from Supabase, it fires 'storage'
+        window.addEventListener('storage', checkInviter);
+        return () => window.removeEventListener('storage', checkInviter);
     }, [referralId]);
 
     const handleInputChange = (e) => {
