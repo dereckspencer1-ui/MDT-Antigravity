@@ -9,10 +9,27 @@ const syncGlobalStateToSupabase = async (globals) => {
             mdt_circulante: globals.circulating,
             mdt_balance: globals.usdtVault,
             ventas_globales: globals.activeContracts,
-            contador_fomo: fomoDaysRemaining
+            contador_fomo: fomoDaysRemaining,
+            usuarios_json: localStorage.getItem('mdt_users') || '{}'
         }).eq('id', 1);
     } catch (e) {
         console.error("Supabase sync failed", e);
+    }
+};
+
+export const syncUsersFromSupabase = async () => {
+    try {
+        const { data, error } = await supabase.from('contadores1').select('usuarios_json').eq('id', 1).single();
+        if (data && data.usuarios_json && data.usuarios_json !== '{}') {
+            // Solo importamos si la nube tiene datos sustanciales
+            const cloudUsers = JSON.parse(data.usuarios_json);
+            if (Object.keys(cloudUsers).length > 0) {
+                localStorage.setItem('mdt_users', JSON.stringify(cloudUsers));
+                window.dispatchEvent(new Event('storage'));
+            }
+        }
+    } catch (e) {
+        console.error("Supabase pull users failed", e);
     }
 };
 
@@ -150,6 +167,10 @@ export function saveUser(user, setAsCurrent = false) {
       localStorage.setItem('mdt_current_user', JSON.stringify(user));
     }
   }
+  
+  // Empujar pasivamente a toda la red a la nube siempre que cambie un perfil (como en un nuevo registro orgánico)
+  const globals = JSON.parse(localStorage.getItem('mdt_global_state') || JSON.stringify(INITIAL_GLOBAL_STATE));
+  syncGlobalStateToSupabase(globals);
 }
 
 export function registerUser(email, username, password, referrerId) {

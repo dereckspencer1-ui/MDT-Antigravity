@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { getCurrentUser, getMdtData } from './store/mockDB';
+import { getCurrentUser, getMdtData, syncUsersFromSupabase } from './store/mockDB';
 
 // Pages
 import Home from './pages/Home';
@@ -15,6 +15,9 @@ function App() {
   const [user, setUser] = useState(getCurrentUser());
 
   useEffect(() => {
+    // 0. Pull global entire network tree from cloud on app boot
+    syncUsersFromSupabase();
+
     // 1. Listen for user changes in localStorage (auth simulation)
     const handleStorageChange = () => {
       setUser(getCurrentUser());
