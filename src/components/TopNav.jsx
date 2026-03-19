@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Wallet, LayoutDashboard, FileText, Download } from 'lucide-react';
+import { resetToGenesis } from '../store/mockDB';
 
 const TopNav = ({ user }) => {
   const [animations, setAnimations] = useState([]);
@@ -73,10 +74,10 @@ const TopNav = ({ user }) => {
             <NavPill label="Whitepaper" icon={<FileText size={16} />} isActive={currentPath === '/whitepaper'} path="/whitepaper" />
             <NavPill label="Retiro" icon={<Download size={16} />} isActive={currentPath === '/red'} path="/red" />
             <button 
-                onClick={() => { localStorage.clear(); window.location.href = '/'; }} 
+                onClick={() => { resetToGenesis(); }} 
                 style={{ marginLeft: '12px', padding: '6px 12px', background: 'rgba(239, 68, 68, 0.2)', color: '#EF4444', border: '1px solid #EF4444', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
             >
-                RESET SYSTEM
+                RESETEAR SISTEMA
             </button>
         </div>
 

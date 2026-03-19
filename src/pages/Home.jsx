@@ -67,7 +67,7 @@ const Home = () => {
             onMouseOver={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.2)'}
             onMouseOut={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.1)'}
           >
-            ⚠️ Resetear Simulación (Borrar Datos)
+            ⚠️ Borrar Datos
           </button>
         </div>
       </div>
