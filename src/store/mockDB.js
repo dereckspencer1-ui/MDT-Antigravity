@@ -176,7 +176,7 @@ export function registerUser(email, username, password, referrerId) {
 
 export const getReferrerList = (refId) => {
     const users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
-    const referrer = Object.values(users).find(u => u.id === refId || u.username === refId);
+    const referrer = Object.values(users).find(u => u.id === refId || u.username === refId || u.wallet === refId);
     
     if (referrer && referrer.contractList && referrer.contractList.length > 0) {
         return referrer.contractList;
