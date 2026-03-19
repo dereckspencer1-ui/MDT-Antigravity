@@ -83,6 +83,9 @@ const Dashboard = ({ user }) => {
       // Clear any existing simulation
       if (window.matrixInterval) clearInterval(window.matrixInterval);
       
+      localStorage.removeItem('mdt_matrix_queue');
+      localStorage.removeItem('mdt_matrix_counts');
+      
       setTestUsed(true);
       setMsg({ type: 'success', text: '⚡ SIMULACIÓN MATRIZ 6x6 INICIADA: Llenando 9,330 Contratos ⚡' });
       

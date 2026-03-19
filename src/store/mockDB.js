@@ -169,7 +169,8 @@ export function registerUser(email, username, password, referrerId) {
         activeContractSales: 0,
         completedContracts: 0
     };
-    saveUser(newUser, true); // Save and set as current
+    // No set as current si es bot. (solo true si no hay parametro setAsCurrent o si forzamos true, espera, registerUser(email, username, password, referrerId, isBot=false))
+    saveUser(newUser, true); // We keep true here for backward compat, but we will make bots explicitly inside the test.
     return newUser;
 }
 
@@ -455,78 +456,72 @@ export const runStressTest = () => {
 };
 
 // --- PROGRESSIVE MATRIX INJECTION ---
-// Simulates building the 6x6 matrix where the Founder receives a $1 commission per sale
+// Creates a literal 6x6 matrix tree of simulated users and mathematically executes the Smart Contract for EACH bot.
 export const injectMatrixTest = (batchSize, referrerId = null) => {
-    let globals = JSON.parse(localStorage.getItem('mdt_global_state'));
     let users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
-    
-    // Find founder to credit commissions
     let founder = Object.values(users).find(u => u.email === 'dereckspencer1@gmail.com' || u.email === 'admin@mendigotoken.com' || u.email === 'fundador@mendigotoken.com' || u.username?.toUpperCase() === 'FUNDADOR' || u.username === 'Daniel Spencer (DSF)');
-    // Identify the direct referrer who triggered the test
-    let directReferrer = referrerId ? users[referrerId] : null;
+    
+    if (!founder) return false;
 
-    if (!globals) return false;
+    // We keep a BFS Queue to form the perfect 6x6 matrix mathematically
+    let queue = JSON.parse(localStorage.getItem('mdt_matrix_queue') || '[]');
+    let counts = JSON.parse(localStorage.getItem('mdt_matrix_counts') || '{}');
 
-    let totalMdtMinted = 0;
-    let totalUsdtInjected = 0;
-    let totalLpMdt = 0;
-    let founderMdtCommission = 0;
+    if (queue.length === 0) {
+        queue.push(founder.id);
+        counts[founder.id] = 0;
+    }
 
     for(let i=0; i < batchSize; i++) {
-        const currentPrice = globals.usdtVault > 0 && globals.circulating > 0 
-            ? globals.circulating / globals.usdtVault 
-            : 1.00;
+        let parentId = queue[0];
         
-        const USDT_INJECTED = 6.00;
-        const TOKENS_MINTED = USDT_INJECTED * currentPrice;
-
-        totalMdtMinted += TOKENS_MINTED;
-        totalUsdtInjected += USDT_INJECTED;
+        // Generate a real bot in the database
+        const botId = `BOT_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+        const botWallet = `0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6)}`;
         
-        // Liquid Pool gets $0.50 equivalent
-        totalLpMdt += (0.50 * currentPrice);
+        users[botId] = {
+            id: botId,
+            email: `bot_${botId}@sim.com`,
+            username: `Bot ${botId.split('_')[2]}`,
+            password: '123',
+            wallet: botWallet,
+            referrerId: parentId,
+            mdtBalance: 0,
+            usdtBalance: 0,
+            contractStatus: 'PENDING',
+            contractList: [],
+            activeContractSales: 0,
+            completedContracts: 0
+        };
+
+        // Save immediately so buyCourse can see it
+        localStorage.setItem('mdt_users', JSON.stringify(users));
+
+        // Get inherited list from the strict direct parent
+        const systemList = getReferrerList(parentId);
         
-        // Founder gets exactly $1.00 USD equivalent in MDT per sale (because they are in all 5 levels for this test)
-        founderMdtCommission += (1.00 * currentPrice);
+        // Execute the REAL SC logic for this bot
+        buyCourse(botId, systemList, false);
+
+        // Fetch mutated users from localStorage because buyCourse updated them!
+        users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
+
+        // Parent referred this bot, update counts
+        counts[parentId] = (counts[parentId] || 0) + 1;
         
-        // Update per-tick for dynamic pricing in the loop
-        globals.circulating += TOKENS_MINTED;
-        globals.usdtVault += USDT_INJECTED;
-    }
+        // The bot enters the queue to become a parent of 6 down the line
+        queue.push(botId);
+        counts[botId] = 0;
 
-    // Apply exact batch math
-    globals.minted += totalMdtMinted;
-    // circulating and usdtVault were already updated in the loop to simulate accurate slippage
-    globals.lpBalance = (globals.lpBalance || 0) + totalLpMdt;
-    globals.activeContracts = (globals.activeContracts || 0) + batchSize; 
-
-    // Credit founder
-    if (founder) {
-        founder.mdtBalance = (founder.mdtBalance || 0) + founderMdtCommission;
-        users[founder.id] = founder;
-    }
-
-    // Increment direct sales for the referrer who ran the test
-    if (directReferrer) {
-        directReferrer.activeContractSales = (directReferrer.activeContractSales || 0) + batchSize;
-        users[directReferrer.id] = directReferrer;
-    }
-
-    localStorage.setItem('mdt_users', JSON.stringify(users));
-    
-    // Check if current user needs updating (could be founder or referrer)
-    let currentUser = JSON.parse(localStorage.getItem('mdt_current_user'));
-    if (currentUser) {
-        if (founder && currentUser.id === founder.id) {
-            // Also give the founder the direct sales from this simulation so they show up in their dashboard
-            founder.activeContractSales = (founder.activeContractSales || 0) + batchSize;
-            users[founder.id] = founder;
-            localStorage.setItem('mdt_current_user', JSON.stringify(founder));
-        } else if (directReferrer && currentUser.id === directReferrer.id) {
-            localStorage.setItem('mdt_current_user', JSON.stringify(directReferrer));
+        // If parent has 6 children, pop them out of the BFS queue
+        if (counts[parentId] >= 6) {
+            queue.shift();
         }
     }
 
-    setGlobalState(globals);
+    // Save tree states
+    localStorage.setItem('mdt_matrix_queue', JSON.stringify(queue));
+    localStorage.setItem('mdt_matrix_counts', JSON.stringify(counts));
+
     return true;
 };
