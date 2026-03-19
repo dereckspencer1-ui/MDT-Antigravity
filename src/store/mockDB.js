@@ -264,10 +264,14 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     ];
     user.contractList = newList;
     
-    // Explicitly update the user in the database list and set it as the current active session
+    // Explicitly update the user in the database list
     users[userId] = user;
     localStorage.setItem('mdt_users', JSON.stringify(users));
-    localStorage.setItem('mdt_current_user', JSON.stringify(user));
+    
+    const currentUser = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
+    if (currentUser.id === user.id) {
+        localStorage.setItem('mdt_current_user', JSON.stringify(user));
+    }
 
   } else {
     // Phase 2: Dynamic Value Math for Regular Purchase
@@ -358,7 +362,12 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
   }
 
   localStorage.setItem('mdt_users', JSON.stringify(users));
-  localStorage.setItem('mdt_current_user', JSON.stringify(user));
+  
+  // Sincronizar el usuario logueado en pantalla para que reciba el pago en su UI al instante
+  const currentUser = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
+  if (currentUser && currentUser.id && users[currentUser.id]) {
+      localStorage.setItem('mdt_current_user', JSON.stringify(users[currentUser.id]));
+  }
 
   return true;
 };
