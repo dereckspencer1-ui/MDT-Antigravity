@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient';
+import { supabase } from '../supabaseClient.js';
 
 const syncGlobalStateToSupabase = async (globals) => {
     try {
@@ -184,11 +184,11 @@ export const getReferrerList = (refId) => {
     }
     
     return [
-        { position: 1, user: 'Monje Fuego (Quema de Token)', wallet: '0xBURN...0001' },
-        { position: 2, user: 'Monje Aire (DeFi)', wallet: '0xDEFI...0002' },
-        { position: 3, user: 'Monje Roca (Smart Contracts)', wallet: '0xROCA...0003' },
-        { position: 4, user: 'Monje Agua (Pool de Liquidez)', wallet: '0xPOOL...0004' },
-        { position: 5, user: 'FUNDADOR (Mendigo)', wallet: '0xFUNDADOR...MASTER' },
+        { position: 1, user: 'FUNDADOR FUEGO (QUEMA DE TOKEN)', wallet: '0xBURN...0001' },
+        { position: 2, user: 'FUNDADOR AIRE (DEFI)', wallet: '0xDEFI...0002' },
+        { position: 3, user: 'FUNDADOR BOVEDA (ROCA)', wallet: '0xROCA...0003' },
+        { position: 4, user: 'FUNDADOR AGUA (POOL)', wallet: '0xPOOL...0004' },
+        { position: 5, user: 'FUNDADOR (MENDIGO)', wallet: '0xFUNDADOR...MASTER' },
     ];
 };
 
@@ -257,11 +257,11 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
 
     // Fill the list with the Founder's wallet for all 5 positions
     const newList = [
-      { position: 1, user: user.username, wallet: user.wallet },
-      { position: 2, user: user.username, wallet: user.wallet },
-      { position: 3, user: user.username, wallet: user.wallet },
-      { position: 4, user: user.username, wallet: user.wallet },
-      { position: 5, user: user.username, wallet: user.wallet }
+      { position: 1, user: 'FUNDADOR FUEGO (QUEMA DE TOKEN)', wallet: '0xBURN...0001' },
+      { position: 2, user: 'FUNDADOR AIRE (DEFI)', wallet: '0xDEFI...0002' },
+      { position: 3, user: 'FUNDADOR BOVEDA (ROCA)', wallet: '0xROCA...0003' },
+      { position: 4, user: 'FUNDADOR AGUA (POOL)', wallet: '0xPOOL...0004' },
+      { position: 5, user: 'FUNDADOR (MENDIGO)', wallet: user.wallet }
     ];
     user.contractList = newList;
     

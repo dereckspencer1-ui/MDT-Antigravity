@@ -22,24 +22,26 @@ async function runTest() {
     console.log("Métricas Globales Iniciales:", getGlobalMetrics());
 
     // 2. Simular Registro de FUNDADOR (Génesis)
-    // admin@mendigotoken.com and ADMIN_DSF are created by initDB, but let's run the Genesis purchase
-    console.log("\n2. Ejecutando Evento Génesis (FUNDADOR inyecta 30 USDT)...");
+    console.log("\n2. Registrando FUNDADOR y Ejecutando Evento Génesis (FUNDADOR inyecta 30 USDT)...");
+    const adminUser = registerUser('admin@mendigotoken.com', 'FUNDADOR', '123', null);
     try {
-        buyCourse('ADMIN_DSF', [], true); // isGenesis = true
+        buyCourse(adminUser.id, [], true); // isGenesis = true
     } catch (e) {
         console.error("Error en Génesis:", e.message);
     }
     
     const postGenesisMetrics = getGlobalMetrics();
+    const devUser = JSON.parse(localStorage.getItem('mdt_users'))[adminUser.id];
     console.log("Métricas Globales Post-Génesis:", {
         minted: postGenesisMetrics.minted,
         usdtVault: postGenesisMetrics.usdtVault,
         currentPrice: postGenesisMetrics.currentPrice,
         circulating: postGenesisMetrics.circulating
     });
+    console.log(`Balance del Desarrollador (FUNDADOR): ${devUser.mdtBalance} MDT`);
 
     // 3. Simular Registro de un Usuario Nuevo (Venta Regular)
-    console.log("\n3. Registrando nuevo usuario y ejecutando Primera Venta...");
+    console.log("\n3. Registrando nuevo usuario y ejecutando Primera Inyección (6 USDT)...");
     const newUser = registerUser('test@user.com', 'Tester', '123', 'ADMIN_DSF');
     // We simulate the systemList passed from FUNDADOR
     const sysList = [

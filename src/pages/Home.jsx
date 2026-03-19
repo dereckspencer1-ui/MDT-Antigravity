@@ -48,6 +48,32 @@ const Home = () => {
             Continuar
           </button>
         </form>
+
+        <div style={{ marginTop: '40px', borderTop: '1px solid rgba(255,0,0,0.3)', paddingTop: '20px' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' }}>Herramientas de Desarrollador</p>
+          <button 
+            type="button" 
+            onClick={() => {
+              if (window.confirm('¿Borrar toda la red y volver al estado vacío (Pre-Génesis)?')) {
+                localStorage.clear();
+                window.location.href = '/registro';
+              }
+            }}
+            style={{ 
+              background: 'rgba(255, 0, 0, 0.2)', 
+              color: '#ff4444', 
+              border: '1px solid #ff4444', 
+              padding: '8px 16px', 
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              width: '100%'
+            }}
+          >
+            ⚠️ PURGAR RED (HARD RESET) ⚠️
+          </button>
+        </div>
+
       </div>
     </div>
   );
