@@ -178,8 +178,18 @@ const MyNetwork = ({ user, metrics }) => {
 
         {/* Withdraw / Burn Column */}
         <div className="glass-panel" style={{ padding: '32px', flex: 2, background: 'rgba(2, 6, 23, 0.6)' }}>
+           {/* WALLET ADDRESS BLOCK */}
+           <div style={{ padding: '24px', marginBottom: '32px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+               <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>
+                   TU DIRECCIÓN DE BILLETERA (RECEPTOR)
+               </h4>
+               <p style={{ fontFamily: 'monospace', fontSize: '18px', color: 'var(--primary)', fontWeight: 'bold', margin: '8px 0 0 0', wordBreak: 'break-all' }}>
+                   {localUser?.wallet}
+               </p>
+           </div>
+
            {/* QUEMA */}
-           <div style={{ padding: '0px', borderTop: '4px solid #F59E0B' }}>
+           <div style={{ padding: '0px', borderTop: '4px solid #F59E0B', paddingTop: '32px' }}>
               <h4 style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '18px', marginBottom: '24px', fontWeight: '900', color: '#fff' }}>
                   <HandCoins size={24} color="#F59E0B" /> Quema Criptográfica (MDT → USDT)
               </h4>
