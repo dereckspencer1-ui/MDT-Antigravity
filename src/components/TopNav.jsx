@@ -182,22 +182,6 @@ const TopNav = ({ user }) => {
             <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px', transition: 'color 0.2s', padding: '8px' }}>
                 Cerrar Sesión
             </button>
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px', 
-                padding: '8px 16px', 
-                background: 'rgba(2, 20, 10, 0.8)', 
-                border: '1px solid rgba(0, 230, 118, 0.3)', 
-                borderRadius: '20px',
-                color: 'var(--text-muted)',
-                fontSize: '12px',
-                fontFamily: 'monospace'
-            }}>
-                <Wallet size={14} color="var(--primary)" />
-                {user ? user.wallet : '0x...demo'}
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', marginLeft: '4px', boxShadow: '0 0 8px var(--primary)' }} />
-            </div>
         </div>
     </header>
   );
