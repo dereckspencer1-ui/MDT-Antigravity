@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { getUserByEmail } from '../store/mockDB';
 import { LogIn } from 'lucide-react';
@@ -9,6 +9,14 @@ const Home = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  
+  const [isPro, setIsPro] = useState(document.body.classList.contains('theme-pro'));
+
+  useEffect(() => {
+    const handleThemeChange = () => setIsPro(document.body.classList.contains('theme-pro'));
+    window.addEventListener('theme-changed', handleThemeChange);
+    return () => window.removeEventListener('theme-changed', handleThemeChange);
+  }, []);
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -65,7 +73,7 @@ const Home = () => {
             <LogIn size={18} /> Entrar
           </Link>
         </div>
-        <img src="/Mendigotoken-logo.png" alt="Logo" style={{ width: '80px', marginBottom: '20px' }} />
+        <img src={isPro ? "/nuevo-logo-claro.png" : "/Mendigotoken-logo.png"} alt="Logo" style={{ width: '80px', marginBottom: '20px' }} />
         <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--primary)' }}>MENDIGOTOKEN PRO</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '14px' }}>Smart Contract Factory V4.0</p>
         

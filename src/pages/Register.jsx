@@ -26,6 +26,14 @@ const Register = () => {
     const [inviter, setInviter] = useState(null);
     const [error, setError] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    
+    const [isPro, setIsPro] = useState(document.body.classList.contains('theme-pro'));
+
+    useEffect(() => {
+        const handleThemeChange = () => setIsPro(document.body.classList.contains('theme-pro'));
+        window.addEventListener('theme-changed', handleThemeChange);
+        return () => window.removeEventListener('theme-changed', handleThemeChange);
+    }, []);
 
     useEffect(() => {
         // Function to check inviter either on mount or when Supabase finishes downloading the users
@@ -131,7 +139,7 @@ const Register = () => {
                 </div>
             ) : (
                 <div className="glass-panel" style={{ padding: '40px', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-                    <img src="/Mendigotoken-logo.png" alt="Logo" style={{ width: '60px', marginBottom: '20px' }} />
+                    <img src={isPro ? "/nuevo-logo-claro.png" : "/Mendigotoken-logo.png"} alt="Logo" style={{ width: '60px', marginBottom: '20px' }} />
                     <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--primary)' }}>NUEVO REGISTRO</h2>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '14px' }}>
                         Crea tu perfil en la red MDT Pro.
