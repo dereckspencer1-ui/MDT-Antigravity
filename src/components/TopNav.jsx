@@ -101,7 +101,7 @@ const TopNav = ({ user }) => {
         </div>
 
         {/* Wallet & Auth Control */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             {/* Live User Balance with Floating Animation */}
             <div style={{ position: 'relative' }}>
                 <div style={{
@@ -115,9 +115,10 @@ const TopNav = ({ user }) => {
                     color: '#F59E0B',
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    boxShadow: '0 0 10px rgba(245, 158, 11, 0.1)'
+                    boxShadow: '0 0 10px rgba(245, 158, 11, 0.1)',
+                    height: '40px'
                 }}>
-                    {(user?.mdtBalance || 0).toFixed(2)} MDT
+                    {(user?.mdtBalance || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} MDT
                 </div>
                 
                 {/* Render active floating animations */}
@@ -152,7 +153,8 @@ const TopNav = ({ user }) => {
                     window.dispatchEvent(new Event('theme-changed'));
                 }}
                 style={{
-                    padding: '8px 12px',
+                    width: '40px',
+                    height: '40px',
                     background: 'transparent',
                     border: 'none',
                     borderRadius: '50%',
@@ -160,7 +162,8 @@ const TopNav = ({ user }) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: 'none',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    padding: 0
                 }}
                 title={isProTheme ? "Modo Oscuro (MDT Clásico)" : "Modo Claro (MDT PRO)"}
             >
@@ -175,11 +178,11 @@ const TopNav = ({ user }) => {
                             window.location.href = '/registro';
                         }
                     }} 
-                    style={{ background: 'rgba(255,0,0,0.2)', border: '1px solid #ff4444', color: '#ff4444', cursor: 'pointer', fontSize: '12px', padding: '6px 12px', borderRadius: '4px' }}>
+                    style={{ background: 'rgba(255,0,0,0.1)', border: '1px solid #ff4444', color: '#ff4444', cursor: 'pointer', fontSize: '12px', padding: '0 12px', borderRadius: '4px', height: '40px', display: 'flex', alignItems: 'center' }}>
                     ⚠️ PURGAR RED ⚠️
                 </button>
             )}
-            <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px', transition: 'color 0.2s', padding: '8px' }}>
+            <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s', padding: '0 16px', borderRadius: '8px', height: '40px', display: 'flex', alignItems: 'center' }}>
                 Cerrar Sesión
             </button>
         </div>
@@ -193,7 +196,7 @@ const NavPill = ({ label, icon, isActive, path }) => (
     <Link 
         to={path}
         style={{ 
-            padding: '8px 20px', 
+            padding: '8px 16px', 
             background: isActive ? 'rgba(0, 255, 136, 0.1)' : 'transparent', 
             color: isActive ? 'var(--primary)' : 'var(--text-muted)',
             borderRadius: '8px', 
@@ -207,7 +210,8 @@ const NavPill = ({ label, icon, isActive, path }) => (
             alignItems: 'center',
             gap: '8px',
             justifyContent: 'center',
-            boxShadow: isActive ? '0 0 10px rgba(0, 255, 136, 0.1)' : 'none'
+            boxShadow: isActive ? '0 0 10px rgba(0, 255, 136, 0.1)' : 'none',
+            height: '40px'
         }}
     >
         {icon}

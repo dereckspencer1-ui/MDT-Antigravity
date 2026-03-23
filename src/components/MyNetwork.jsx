@@ -19,7 +19,7 @@ const MyNetwork = ({ user, metrics }) => {
      return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const refLink = `${window.location.origin}/register?ref=${localUser?.wallet}`;
+  const refLink = `${window.location.origin}/?ref=${localUser?.wallet}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(refLink);
@@ -100,7 +100,11 @@ const MyNetwork = ({ user, metrics }) => {
                   alignItems: 'center',
                   overflow: 'hidden'
               }}>
-                <span style={{ 
+                <a  
+                    href={refLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ 
                     fontFamily: 'monospace', 
                     fontSize: '16px', 
                     color: 'var(--primary)',
@@ -109,10 +113,12 @@ const MyNetwork = ({ user, metrics }) => {
                     textOverflow: 'ellipsis',
                     fontWeight: 'bold',
                     textShadow: '0 0 8px rgba(0,255,136,0.4)',
-                    letterSpacing: '0.5px'
+                    letterSpacing: '0.5px',
+                    textDecoration: 'none',
+                    cursor: 'pointer'
                 }}>
                     {refLink}
-                </span>
+                </a>
               </div>
               <button 
                   onClick={handleCopy} 

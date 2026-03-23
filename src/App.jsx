@@ -55,8 +55,13 @@ function App() {
         // Needs to buy contract
         navigate('/comprar', { replace: true });
       } else if (user.contractStatus === 'ACTIVE' && (isPublicRoute || location.pathname === '/comprar')) {
-        // Active user trying to access public/purchase routing -> go to dashboard
-        navigate('/dashboard', { replace: true });
+        // Permitir que usuarios activos vean la página de inicio o registro si están probando un link de referido
+        if ((location.pathname === '/register' || location.pathname === '/') && location.search.includes('ref=')) {
+          // No redirigir
+        } else {
+          // Active user trying to access public/purchase routing -> go to dashboard
+          navigate('/dashboard', { replace: true });
+        }
       }
     }
   }, [user, location.pathname, navigate]);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getAllUsers, registerUser } from '../store/mockDB';
+import { getAllUsers, registerUser, getCurrentUser } from '../store/mockDB';
 import { Shield, ChevronRight } from 'lucide-react';
 
 const Register = () => {
@@ -13,6 +13,9 @@ const Register = () => {
     // Check for referral link
     const searchParams = new URLSearchParams(location.search);
     const referralId = searchParams.get('ref');
+    
+    // Check if user is testing their link
+    const currentUser = getCurrentUser();
     
     const [formData, setFormData] = useState({
         email: initialEmail,
@@ -133,6 +136,12 @@ const Register = () => {
                     <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '14px' }}>
                         Crea tu perfil en la red MDT Pro.
                     </p>
+
+                    {currentUser && referralId && (
+                        <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '13px', color: '#F59E0B', textAlign: 'center' }}>
+                            <strong>Estás en Modo Vista Previa.</strong> Cierra sesión o abre en modo Incógnito para registrar a un referido real.
+                        </div>
+                    )}
 
                     {inviter && (
                         <div style={{ background: 'rgba(0, 255, 65, 0.1)', border: '1px solid rgba(0, 255, 65, 0.3)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '12px', color: 'var(--text-main)' }}>

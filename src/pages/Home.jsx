@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { getUserByEmail } from '../store/mockDB';
 import { LogIn } from 'lucide-react';
 import YinYang from '../components/YinYang';
@@ -8,6 +8,7 @@ const Home = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -22,8 +23,14 @@ const Home = () => {
       // Pass the email to the Login page
       navigate('/login', { state: { email } });
     } else {
+      // Extraemos el parámetro ref si existe
+      const searchParams = new URLSearchParams(location.search);
+      const referralId = searchParams.get('ref');
+      
+      const registerPath = referralId ? `/register?ref=${referralId}` : '/register';
+
       // Pass the email to the Register page
-      navigate('/register', { state: { email } });
+      navigate(registerPath, { state: { email } });
     }
   };
 
