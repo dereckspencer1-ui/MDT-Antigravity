@@ -43,36 +43,56 @@ const Home = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '20px' }} className="animate-reveal">
-      <div className="glass-panel" style={{ padding: '40px', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'flex-end', width: '100%', position: 'absolute', top: '20px', right: '20px' }}>
-            {/* THEME TOGGLE FOR PUBLIC HOME */}
-            <button 
-                onClick={() => {
-                    const isPro = document.body.classList.contains('theme-pro');
-                    localStorage.setItem('mdt_theme', isPro ? 'dark' : 'pro');
-                    window.dispatchEvent(new Event('theme-changed'));
-                }}
-                style={{
-                    padding: '8px',
-                    background: 'transparent',
-                    border: 'none',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: 'none',
-                    cursor: 'pointer'
-                }}
-                title="Cambiar Diseño"
-            >
-                <YinYang size={36} isPro={document.body.classList.contains('theme-pro')} />
-            </button>
+    <div 
+      className="animate-reveal"
+      style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        flex: 1, 
+        padding: '20px',
+        backgroundImage: isPro ? "url('/nuevo-logo-claro.png')" : 'none',
+        backgroundSize: 'contain',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '100vh',
+        width: '100vw',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
+      }} 
+    >
+      {/* THEME TOGGLE FOR PUBLIC HOME - FIXED POSITION */}
+      <button 
+          onClick={() => {
+              const themeIsPro = document.body.classList.contains('theme-pro');
+              localStorage.setItem('mdt_theme', themeIsPro ? 'dark' : 'pro');
+              window.dispatchEvent(new Event('theme-changed'));
+          }}
+          style={{
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              padding: '8px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid var(--border)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              cursor: 'pointer',
+              zIndex: 100
+          }}
+          title="Cambiar Diseño"
+      >
+          <YinYang size={36} isPro={isPro} />
+      </button>
 
-          <Link to="/login" className="glass-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-            <LogIn size={18} /> Entrar
-          </Link>
-        </div>
+      <div className="glass-panel" style={{ padding: '40px', maxWidth: '400px', width: '100%', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         {isPro && <img src="/nuevo-logo-claro.png" alt="Logo" style={{ width: '80px', marginBottom: '20px' }} />}
         <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--primary)' }}>MENDIGOTOKEN PRO</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '14px' }}>Smart Contract Factory V4.0</p>
