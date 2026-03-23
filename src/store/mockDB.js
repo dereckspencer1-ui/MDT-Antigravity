@@ -295,16 +295,16 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
       ? globals.usdtVault / globals.circulating 
       : 1.00;
     const USDT_INJECTED = 6.00;
-    const TOKENS_MINTED = USDT_INJECTED * currentPrice;
+    const TOKENS_MINTED = USDT_INJECTED / currentPrice;
 
     globals.minted += TOKENS_MINTED;
     globals.circulating += TOKENS_MINTED;
     globals.usdtVault += USDT_INJECTED;
     globals.activeContracts = (globals.activeContracts || 0) + 1;
 
-    const mdtPerUser = 1.00 * currentPrice;
-    const mdtForDev = 0.50 * currentPrice;
-    const mdtForLp = 0.50 * currentPrice;
+    const mdtPerUser = 1.00 / currentPrice;
+    const mdtForDev = 0.50 / currentPrice;
+    const mdtForLp = 0.50 / currentPrice;
 
     globals.lpBalance = (globals.lpBalance || 0) + mdtForLp;
 
@@ -384,8 +384,8 @@ export const withdrawMDT = (userId, amount) => {
     ? globals.usdtVault / globals.circulating
     : 1.00;
 
-  // If we have MDT, and we want USDT: USDT = MDT / Price
-  const usdtValueRaw = amount / currentPrice;
+  // If we have MDT, and we want USDT: USDT = MDT * Price
+  const usdtValueRaw = amount * currentPrice;
   const fee = usdtValueRaw * 0.066;
   const usdtCredit = usdtValueRaw - fee;
 
@@ -453,13 +453,13 @@ export const runStressTest = () => {
       : 1.00;
 
     const USDT_INJECTED = 6.00;
-    const TOKENS_MINTED = USDT_INJECTED * currentPrice;
+    const TOKENS_MINTED = USDT_INJECTED / currentPrice;
 
     globals.minted += TOKENS_MINTED;
     globals.circulating += TOKENS_MINTED;
     globals.usdtVault += USDT_INJECTED;
 
-    const mdtForLp = 0.50 * currentPrice;
+    const mdtForLp = 0.50 / currentPrice;
     globals.lpBalance = (globals.lpBalance || 0) + mdtForLp;
     globals.activeContracts = (globals.activeContracts || 0) + 1; // Increment global contracts
   }
