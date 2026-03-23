@@ -139,7 +139,7 @@ const Register = () => {
                 </div>
             ) : (
                 <div className="glass-panel" style={{ padding: '40px', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-                    <img src={isPro ? "/nuevo-logo-claro.png" : "/Mendigotoken-logo.png"} alt="Logo" style={{ width: '60px', marginBottom: '20px' }} />
+                    {isPro && <img src="/nuevo-logo-claro.png" alt="Logo" style={{ width: '60px', marginBottom: '20px' }} />}
                     <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--primary)' }}>NUEVO REGISTRO</h2>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '14px' }}>
                         Crea tu perfil en la red MDT Pro.

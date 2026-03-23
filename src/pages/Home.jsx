@@ -73,7 +73,7 @@ const Home = () => {
             <LogIn size={18} /> Entrar
           </Link>
         </div>
-        <img src={isPro ? "/nuevo-logo-claro.png" : "/Mendigotoken-logo.png"} alt="Logo" style={{ width: '80px', marginBottom: '20px' }} />
+        {isPro && <img src="/nuevo-logo-claro.png" alt="Logo" style={{ width: '80px', marginBottom: '20px' }} />}
         <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--primary)' }}>MENDIGOTOKEN PRO</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '14px' }}>Smart Contract Factory V4.0</p>
         
