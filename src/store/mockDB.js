@@ -34,7 +34,10 @@ export const syncUsersFromSupabase = async () => {
       // Solo importamos si la nube tiene datos sustanciales
       const cloudUsers = JSON.parse(data.usuarios_json);
       if (Object.keys(cloudUsers).length > 0) {
-        localStorage.setItem('mdt_users', JSON.stringify(cloudUsers));
+        const localUsers = JSON.parse(localStorage.getItem('mdt_users') || '{}');
+        // El merge asegura que si el usuario se registró super rápido antes del API, no se borre.
+        const mergedUsers = { ...cloudUsers, ...localUsers };
+        localStorage.setItem('mdt_users', JSON.stringify(mergedUsers));
         window.dispatchEvent(new Event('storage'));
       }
     }

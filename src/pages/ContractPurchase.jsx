@@ -78,7 +78,7 @@ const ContractPurchase = ({ user }) => {
                 </button>
                 
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '24px' }}>
-                    Al confirmar, ingresarás a la Posición #5 de la lista a la que fuiste invitado (o la red original). Recibirás 6 MDT en circulación.
+                    Enviarás MDT a la red.
                 </p>
             </div>
         </div>
