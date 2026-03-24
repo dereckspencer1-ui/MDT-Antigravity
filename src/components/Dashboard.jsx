@@ -30,8 +30,8 @@ const Dashboard = ({ user }) => {
            setMetrics(prev => {
              const updated = {
                  ...prev,
-                 minted: row.mdt_acunado ?? prev.minted,
-                 burned: row.mdt_quemado ?? prev.burned,
+                 minted: row.mdt_acunado ?? (row.mdt_circulante || prev.minted),
+                 burned: row.mdt_quemado ?? (prev.burned || 0),
                  circulating: row.mdt_circulante ?? prev.circulating,
                  usdtVault: row.mdt_balance ?? prev.usdtVault,
                  activeContracts: row.ventas_globales ?? prev.activeContracts,
