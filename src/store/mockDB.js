@@ -51,11 +51,15 @@ export const syncUsersFromSupabase = async () => {
         // El merge asegura que si el usuario se registró super rápido antes del API, no se borre.
         const mergedUsers = { ...cloudUsers, ...localUsers };
         localStorage.setItem('mdt_users', JSON.stringify(mergedUsers));
+        localStorage.setItem('mockdb_debug', 'Data Loaded Successfully: ' + Object.keys(cloudUsers).length + ' users');
         window.dispatchEvent(new Event('storage'));
       }
+    } else {
+        localStorage.setItem('mockdb_debug', 'No data or usuarios_json is empty {}');
     }
   } catch (e) {
     console.error("Supabase pull users failed", e);
+    localStorage.setItem('mockdb_debug', 'ERROR: ' + (e.message || String(e)));
   } finally {
     isSyncing = false;
     window.dispatchEvent(new Event('sync-complete'));

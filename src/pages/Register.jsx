@@ -28,6 +28,7 @@ const Register = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [userCount, setUserCount] = useState(getAllUsers().length);
     const [isSyncing, setIsSyncing] = useState(getSyncStatus());
+    const [debugInfo, setDebugInfo] = useState('');
     
     const [isPro, setIsPro] = useState(document.body.classList.contains('theme-pro'));
 
@@ -60,11 +61,18 @@ const Register = () => {
             checkInviter();
             setUserCount(getAllUsers().length);
             setIsSyncing(getSyncStatus());
+            const debugLog = localStorage.getItem('mockdb_debug') || '';
+            if (debugLog) setDebugInfo(debugLog);
         };
         
         window.addEventListener('storage', handleStorage);
         window.addEventListener('session-changed', handleStorage);
         window.addEventListener('sync-complete', handleStorage);
+        
+        // Initial check
+        const debugLog = localStorage.getItem('mockdb_debug') || '';
+        if (debugLog) setDebugInfo(debugLog);
+        
         return () => {
             window.removeEventListener('storage', handleStorage);
             window.removeEventListener('session-changed', handleStorage);
@@ -154,6 +162,13 @@ const Register = () => {
             ) : userCount === 0 ? (
                 <div className="glass-panel" style={{ padding: '60px', maxWidth: '500px', width: '100%', textAlign: 'center', background: 'rgba(0, 51, 20, 0.4)' }}>
                     <Shield size={64} color="var(--primary)" style={{ marginBottom: '24px' }} />
+                    {debugInfo && (
+                        <div style={{ background: 'rgba(255, 255, 0, 0.1)', border: '1px solid #FFD700', padding: '10px', borderRadius: '4px', marginBottom: '16px', fontSize: '11px', color: '#FFD700', textAlign: 'left', wordBreak: 'break-all' }}>
+                            <strong>DEBUG LOG:</strong><br/>
+                            {debugInfo.substring(0, 300)}...
+                        </div>
+                    )}
+                    
                     <h2 style={{ fontSize: '28px', marginBottom: '16px', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '2px' }}>
                         Inicialización Génesis
                     </h2>
