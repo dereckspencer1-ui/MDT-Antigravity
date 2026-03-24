@@ -26,6 +26,7 @@ const Register = () => {
     const [inviter, setInviter] = useState(null);
     const [error, setError] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [userCount, setUserCount] = useState(getAllUsers().length);
     
     const [isPro, setIsPro] = useState(document.body.classList.contains('theme-pro'));
 
@@ -54,8 +55,17 @@ const Register = () => {
         checkInviter();
 
         // When App.jsx finishes fetching 'usuarios_json' from Supabase, it fires 'storage'
-        window.addEventListener('storage', checkInviter);
-        return () => window.removeEventListener('storage', checkInviter);
+        const handleStorage = () => {
+            checkInviter();
+            setUserCount(getAllUsers().length);
+        };
+        
+        window.addEventListener('storage', handleStorage);
+        window.addEventListener('session-changed', handleStorage);
+        return () => {
+            window.removeEventListener('storage', handleStorage);
+            window.removeEventListener('session-changed', handleStorage);
+        };
     }, [referralId]);
 
     const handleInputChange = (e) => {
@@ -116,7 +126,7 @@ const Register = () => {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '20px' }} className="animate-reveal">
             
             {/* INICIO DE GÉNESIS (Only visible if the system is completely empty) */}
-            {getAllUsers().length === 0 ? (
+            {userCount === 0 ? (
                 <div className="glass-panel" style={{ padding: '60px', maxWidth: '500px', width: '100%', textAlign: 'center', background: 'rgba(0, 51, 20, 0.4)' }}>
                     <Shield size={64} color="var(--primary)" style={{ marginBottom: '24px' }} />
                     <h2 style={{ fontSize: '28px', marginBottom: '16px', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '2px' }}>
