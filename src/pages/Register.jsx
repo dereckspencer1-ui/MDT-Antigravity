@@ -190,8 +190,18 @@ const Register = () => {
                         <input type="text" name="username" placeholder="Usuario (Ej. FUNDADOR)" className="glass-input" value={formData.username} onChange={handleInputChange} required />
                         <input type="password" name="password" placeholder="Contraseña Segura" className="glass-input" value={formData.password} onChange={handleInputChange} required />
                         
-                        <button type="submit" className="glass-btn" style={{ width: '100%', marginTop: '24px', background: 'var(--primary)', color: '#000' }} disabled={isProcessing}>
+                        {error && <div style={{ color: '#ff4444', marginBottom: '8px', fontSize: '13px', background: 'rgba(255,0,0,0.1)', padding: '10px', borderRadius: '4px', textAlign: 'center' }}>{error}</div>}
+
+                        <button type="submit" className="glass-btn" style={{ width: '100%', marginTop: '16px', background: 'var(--primary)', color: '#000' }} disabled={isProcessing}>
                             {isProcessing ? 'INICIALIZANDO...' : 'INICIALIZAR GÉNESIS'}
+                        </button>
+
+                        <button 
+                            type="button"
+                            onClick={() => { if(window.confirm('¿Borrar memoria local de simulador?')) { localStorage.clear(); window.location.href = '/login'; } }}
+                            style={{ background: 'transparent', border: 'none', color: '#ff4444', marginTop: '16px', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
+                        >
+                            ⚠️ Purgar Simulador Local (Lleno)
                         </button>
                     </form>
                 </div>
@@ -241,6 +251,14 @@ const Register = () => {
                             style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '12px', marginTop: '16px', cursor: 'pointer', textDecoration: 'underline' }}
                         >
                             Volver al Inicio
+                        </button>
+
+                        <button 
+                            type="button"
+                            onClick={() => { if(window.confirm('¿Borrar memoria local de simulador?')) { localStorage.clear(); window.location.href = '/login'; } }}
+                            style={{ background: 'transparent', border: 'none', color: '#ff4444', marginTop: '16px', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
+                        >
+                            ⚠️ Purgar Simulador Local (Lleno)
                         </button>
                     </form>
                 </div>

@@ -59,6 +59,14 @@ const Login = () => {
                     >
                         Cambiar Correo
                     </button>
+
+                    <button 
+                        type="button"
+                        onClick={() => { if(window.confirm('¿Borrar memoria local de simulador?')) { localStorage.clear(); window.location.href = '/login'; } }}
+                        style={{ background: 'transparent', border: 'none', color: '#ff4444', marginTop: '16px', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
+                    >
+                        ⚠️ Purgar Simulador Local (Lleno)
+                    </button>
                 </form>
             </div>
         </div>
