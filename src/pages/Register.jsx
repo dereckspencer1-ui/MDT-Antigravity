@@ -87,6 +87,21 @@ const Register = () => {
 
         const users = getAllUsers();
         
+        // GENESIS BLOCK AUTHORIZATION CHECK
+        if (users.length === 0) {
+            const validEmails = ['fundador@mendigotoken.com', 'admin@mendigotoken.com', 'dereckspencer1@gmail.com'];
+            if (!validEmails.includes(formData.email.toLowerCase())) {
+                setError('Error de Seguridad: Sólo el Fundador Creador está autorizado para inicializar el Bloque Génesis.');
+                setIsProcessing(false);
+                return;
+            }
+            if (!formData.username.toUpperCase().includes('FUNDADOR')) {
+                setError('Error: El nombre de usuario en el Bloque Génesis debe contener la palabra FUNDADOR.');
+                setIsProcessing(false);
+                return;
+            }
+        }
+
         if (!formData.email || !formData.username || !formData.password) {
             setError('Por favor completa los campos obligatorios.');
             setIsProcessing(false);
