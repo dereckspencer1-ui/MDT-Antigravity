@@ -187,25 +187,33 @@ export function getUserById(id) {
 }
 
 export function saveUser(user, setAsCurrent = false) {
-  const users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
-  users[user.id] = user;
-  localStorage.setItem('mdt_users', JSON.stringify(users));
+  try {
+    const users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
+    users[user.id] = user;
+    localStorage.setItem('mdt_users', JSON.stringify(users));
 
-  if (setAsCurrent) {
-    localStorage.setItem('mdt_current_user', JSON.stringify(user));
-    window.dispatchEvent(new Event('session-changed'));
-  } else {
-    // Update current session user only if modifying self
-    const currentUser = getCurrentUser();
-    if (currentUser && currentUser.id === user.id) {
+    if (setAsCurrent) {
       localStorage.setItem('mdt_current_user', JSON.stringify(user));
       window.dispatchEvent(new Event('session-changed'));
+    } else {
+      // Update current session user only if modifying self
+      const currentUser = getCurrentUser();
+      if (currentUser && currentUser.id === user.id) {
+        localStorage.setItem('mdt_current_user', JSON.stringify(user));
+        window.dispatchEvent(new Event('session-changed'));
+      }
     }
-  }
 
-  // Empujar pasivamente a toda la red a la nube siempre que cambie un perfil (como en un nuevo registro orgánico)
-  const globals = JSON.parse(localStorage.getItem('mdt_global_state') || JSON.stringify(INITIAL_GLOBAL_STATE));
-  syncGlobalStateToSupabase(globals);
+    // Empujar pasivamente a toda la red a la nube siempre que cambie un perfil
+    const globals = JSON.parse(localStorage.getItem('mdt_global_state') || JSON.stringify(INITIAL_GLOBAL_STATE));
+    syncGlobalStateToSupabase(globals);
+    return true;
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.message.includes('quota')) {
+      throw new Error("Memoria del navegador llena por exceso de simulaciones (Prueba de Estrés). Por favor, ve al Dashboard y usa el botón 'PURGAR RED'.");
+    }
+    throw e;
+  }
 }
 
 export function registerUser(email, username, password, referrerId) {
@@ -225,9 +233,12 @@ export function registerUser(email, username, password, referrerId) {
     activeContractSales: 0,
     completedContracts: 0
   };
-  // No set as current si es bot. (solo true si no hay parametro setAsCurrent o si forzamos true, espera, registerUser(email, username, password, referrerId, isBot=false))
-  saveUser(newUser, true); // We keep true here for backward compat, but we will make bots explicitly inside the test.
-  return newUser;
+  try {
+    saveUser(newUser, true); // We keep true here for backward compat
+    return newUser;
+  } catch (e) {
+    return { error: e.message };
+  }
 }
 
 export const getReferrerList = (refId) => {

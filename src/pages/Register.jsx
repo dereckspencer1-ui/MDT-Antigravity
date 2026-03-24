@@ -139,12 +139,12 @@ const Register = () => {
             inviter ? inviter.id : null
         );
 
-        if (newUser) {
+        if (newUser && !newUser.error) {
             // Success! The user is now logged in via mockDB (it sets 'mdt_current_user')
             // Send them directly to the Contract Purchase View
             navigate('/comprar');
         } else {
-            setError('Error al registrar. Intenta de nuevo.');
+            setError(newUser?.error || 'Error al registrar. Intenta de nuevo.');
             setIsProcessing(false);
         }
     };
