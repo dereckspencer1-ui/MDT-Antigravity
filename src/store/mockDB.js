@@ -19,6 +19,8 @@ const syncGlobalStateToSupabase = async (globals) => {
       
       if (firstRow && firstRow.id) {
         await supabase.from('contadores1').update({
+          mdt_acunado: snapshot.minted,
+          mdt_quemado: snapshot.burned,
           mdt_circulante: snapshot.circulating,
           mdt_balance: snapshot.usdtVault,
           ventas_globales: snapshot.activeContracts,
