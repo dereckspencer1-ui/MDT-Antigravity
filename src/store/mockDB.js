@@ -1,20 +1,30 @@
 import { supabase } from '../supabaseClient.js';
 
-const syncGlobalStateToSupabase = async (globals) => {
-  try {
-    const dailyQuota = globals.maxSupply / 365;
-    const fomoDaysRemaining = Math.max(0, 365 - Math.floor(globals.minted / dailyQuota));
+let syncTimeout = null;
 
-    await supabase.from('contadores1').update({
-      mdt_circulante: globals.circulating,
-      mdt_balance: globals.usdtVault,
-      ventas_globales: globals.activeContracts,
-      contador_fomo: fomoDaysRemaining,
-      usuarios_json: localStorage.getItem('mdt_users') || '{}'
-    }).eq('id', 1);
-  } catch (e) {
-    console.error("Supabase sync failed", e);
-  }
+const syncGlobalStateToSupabase = async (globals) => {
+  if (syncTimeout) clearTimeout(syncTimeout);
+  
+  // Create a deep copy of globals to avoid mutation by reference during timeout
+  const snapshot = JSON.parse(JSON.stringify(globals));
+  
+  // Debounce Supabase writes to prevent race conditions during stress testing
+  syncTimeout = setTimeout(async () => {
+    try {
+      const dailyQuota = snapshot.maxSupply / 365;
+      const fomoDaysRemaining = Math.max(0, 365 - Math.floor(snapshot.minted / dailyQuota));
+
+      await supabase.from('contadores1').update({
+        mdt_circulante: snapshot.circulating,
+        mdt_balance: snapshot.usdtVault,
+        ventas_globales: snapshot.activeContracts,
+        contador_fomo: fomoDaysRemaining,
+        usuarios_json: localStorage.getItem('mdt_users') || '{}'
+      }).eq('id', 1);
+    } catch (e) {
+      console.error("Supabase sync failed", e);
+    }
+  }, 1000);
 };
 
 export const syncUsersFromSupabase = async () => {
