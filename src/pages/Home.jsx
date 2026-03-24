@@ -43,27 +43,7 @@ const Home = () => {
   };
 
   return (
-    <div 
-      className="animate-reveal"
-      style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        flex: 1, 
-        padding: '20px',
-        backgroundImage: isPro ? "url('/nuevo-logo-claro.png')" : 'none',
-        backgroundSize: 'contain',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh',
-        width: '100vw',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 1
-      }} 
-    >
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '20px' }} className="animate-reveal">
       {/* THEME TOGGLE FOR PUBLIC HOME - FIXED POSITION */}
       <button 
           onClick={() => {
