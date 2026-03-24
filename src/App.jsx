@@ -35,11 +35,16 @@ function App() {
       setUser(getCurrentUser());
     };
     window.addEventListener('storage', handleStorageChange);
+    // Add custom event for same-window changes
+    window.addEventListener('session-changed', handleStorageChange);
     
     // Fallback: check on every route change
     setUser(getCurrentUser());
     
-    return () => window.removeEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('session-changed', handleStorageChange);
+    };
   }, [location.pathname]);
 
   useEffect(() => {

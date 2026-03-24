@@ -160,11 +160,13 @@ export function saveUser(user, setAsCurrent = false) {
 
   if (setAsCurrent) {
     localStorage.setItem('mdt_current_user', JSON.stringify(user));
+    window.dispatchEvent(new Event('session-changed'));
   } else {
     // Update current session user only if modifying self
     const currentUser = getCurrentUser();
     if (currentUser && currentUser.id === user.id) {
       localStorage.setItem('mdt_current_user', JSON.stringify(user));
+      window.dispatchEvent(new Event('session-changed'));
     }
   }
 
@@ -217,6 +219,7 @@ export function loginUser(email, password) {
   const user = Object.values(users).find(u => u.email.toLowerCase() === email.toLowerCase());
   if (user && user.password === password) {
     localStorage.setItem('mdt_current_user', JSON.stringify(user));
+    window.dispatchEvent(new Event('session-changed'));
     return user;
   }
   return null;
@@ -362,6 +365,7 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
   const currentUser = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
   if (currentUser && currentUser.id && users[currentUser.id]) {
     localStorage.setItem('mdt_current_user', JSON.stringify(users[currentUser.id]));
+    window.dispatchEvent(new Event('session-changed'));
   }
 
   // AHORA QUE mdt_users ESTÁ FORMALMENTE GUARDADO Y COMPLETO EN LOCALSTORAGE...
