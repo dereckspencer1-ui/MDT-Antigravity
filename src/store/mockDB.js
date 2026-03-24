@@ -14,13 +14,18 @@ const syncGlobalStateToSupabase = async (globals) => {
       const dailyQuota = snapshot.maxSupply / 365;
       const fomoDaysRemaining = Math.max(0, 365 - Math.floor(snapshot.minted / dailyQuota));
 
-      await supabase.from('contadores1').update({
-        mdt_circulante: snapshot.circulating,
-        mdt_balance: snapshot.usdtVault,
-        ventas_globales: snapshot.activeContracts,
-        contador_fomo: fomoDaysRemaining,
-        usuarios_json: localStorage.getItem('mdt_users') || '{}'
-      }).eq('id', 1);
+      // Prevent hardcoded .eq('id', 1) from silently failing if row ID is different
+      const { data: firstRow } = await supabase.from('contadores1').select('id').limit(1).single();
+      
+      if (firstRow && firstRow.id) {
+        await supabase.from('contadores1').update({
+          mdt_circulante: snapshot.circulating,
+          mdt_balance: snapshot.usdtVault,
+          ventas_globales: snapshot.activeContracts,
+          contador_fomo: fomoDaysRemaining,
+          usuarios_json: localStorage.getItem('mdt_users') || '{}'
+        }).eq('id', firstRow.id);
+      }
     } catch (e) {
       console.error("Supabase sync failed", e);
     }
@@ -34,7 +39,8 @@ export const syncUsersFromSupabase = async () => {
   if (isSyncing) return;
   isSyncing = true;
   try {
-    const { data, error } = await supabase.from('contadores1').select('usuarios_json').eq('id', 1).single();
+    // Safe pull regardless of the ID number (fixes empty database bugs on ID mismatch)
+    const { data, error } = await supabase.from('contadores1').select('usuarios_json').limit(1).single();
     if (data && data.usuarios_json && data.usuarios_json !== '{}') {
       // Solo importamos si la nube tiene datos sustanciales
       const cloudUsers = JSON.parse(data.usuarios_json);
