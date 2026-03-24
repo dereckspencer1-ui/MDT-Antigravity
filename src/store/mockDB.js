@@ -27,7 +27,12 @@ const syncGlobalStateToSupabase = async (globals) => {
   }, 1000);
 };
 
+let isSyncing = false;
+export const getSyncStatus = () => isSyncing;
+
 export const syncUsersFromSupabase = async () => {
+  if (isSyncing) return;
+  isSyncing = true;
   try {
     const { data, error } = await supabase.from('contadores1').select('usuarios_json').eq('id', 1).single();
     if (data && data.usuarios_json && data.usuarios_json !== '{}') {
@@ -43,6 +48,9 @@ export const syncUsersFromSupabase = async () => {
     }
   } catch (e) {
     console.error("Supabase pull users failed", e);
+  } finally {
+    isSyncing = false;
+    window.dispatchEvent(new Event('sync-complete'));
   }
 };
 

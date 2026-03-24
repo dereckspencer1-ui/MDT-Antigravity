@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { getAllUsers, registerUser, getCurrentUser } from '../store/mockDB';
-import { Shield, ChevronRight } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { registerUser, getAllUsers, getCurrentUser, getSyncStatus } from '../store/mockDB';
+import { Shield, UserPlus, Fingerprint, Lock, Mail, Users, ArrowRight } from 'lucide-react';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -27,6 +27,7 @@ const Register = () => {
     const [error, setError] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [userCount, setUserCount] = useState(getAllUsers().length);
+    const [isSyncing, setIsSyncing] = useState(getSyncStatus());
     
     const [isPro, setIsPro] = useState(document.body.classList.contains('theme-pro'));
 
@@ -58,13 +59,16 @@ const Register = () => {
         const handleStorage = () => {
             checkInviter();
             setUserCount(getAllUsers().length);
+            setIsSyncing(getSyncStatus());
         };
         
         window.addEventListener('storage', handleStorage);
         window.addEventListener('session-changed', handleStorage);
+        window.addEventListener('sync-complete', handleStorage);
         return () => {
             window.removeEventListener('storage', handleStorage);
             window.removeEventListener('session-changed', handleStorage);
+            window.removeEventListener('sync-complete', handleStorage);
         };
     }, [referralId]);
 
@@ -125,8 +129,14 @@ const Register = () => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '20px' }} className="animate-reveal">
             
-            {/* INICIO DE GÉNESIS (Only visible if the system is completely empty) */}
-            {userCount === 0 ? (
+            {/* LOADING STATE - PREVENTS GENESIS FALSE POSITIVES */}
+            {isSyncing ? (
+                <div className="glass-panel" style={{ padding: '60px', maxWidth: '500px', width: '100%', textAlign: 'center', background: 'rgba(2, 6, 23, 0.6)' }}>
+                    <div style={{ width: '50px', height: '50px', border: '3px solid rgba(0,255,136,0.2)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 24px' }}></div>
+                    <h3 style={{ color: 'var(--text-main)', fontSize: '20px' }}>Sincronizando Nodo...</h3>
+                    <p style={{ color: 'var(--text-muted)' }}>Cargando participantes globales de la red MDT.</p>
+                </div>
+            ) : userCount === 0 ? (
                 <div className="glass-panel" style={{ padding: '60px', maxWidth: '500px', width: '100%', textAlign: 'center', background: 'rgba(0, 51, 20, 0.4)' }}>
                     <Shield size={64} color="var(--primary)" style={{ marginBottom: '24px' }} />
                     <h2 style={{ fontSize: '28px', marginBottom: '16px', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '2px' }}>
