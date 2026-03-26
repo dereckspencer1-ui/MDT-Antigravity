@@ -43,26 +43,41 @@ export const syncUsersFromSupabase = async () => {
   if (isSyncing) return;
   isSyncing = true;
   try {
-    // Safe pull regardless of the ID number (fixes empty database bugs on ID mismatch)
-    const { data, error } = await supabase.from('contadores1').select('usuarios_json').limit(1).single();
-    if (data && data.usuarios_json && data.usuarios_json !== '{}') {
-      // Solo importamos si la nube tiene datos sustanciales
-      const rawPayload = data.usuarios_json;
-      const cloudUsers = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
-      
-      if (cloudUsers && Object.keys(cloudUsers).length > 0) {
-        const localUsers = JSON.parse(localStorage.getItem('mdt_users') || '{}');
-        // El merge asegura que si el usuario se registró super rápido antes del API, no se borre.
-        const mergedUsers = { ...cloudUsers, ...localUsers };
-        localStorage.setItem('mdt_users', JSON.stringify(mergedUsers));
-        localStorage.setItem('mockdb_debug', 'Data Loaded Successfully: ' + Object.keys(cloudUsers).length + ' users');
-        window.dispatchEvent(new Event('storage'));
+    // Bajar usuarios JSON y todos los contadores globales para que los navegadores frescos no sobrescriban la DB con 0
+    const { data, error } = await supabase.from('contadores1').select('*').limit(1).single();
+    if (data) {
+      if (data.usuarios_json && data.usuarios_json !== '{}') {
+        const rawPayload = data.usuarios_json;
+        const cloudUsers = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
+        
+        if (cloudUsers && Object.keys(cloudUsers).length > 0) {
+          const localUsers = JSON.parse(localStorage.getItem('mdt_users') || '{}');
+          const mergedUsers = { ...cloudUsers, ...localUsers };
+          localStorage.setItem('mdt_users', JSON.stringify(mergedUsers));
+          localStorage.setItem('mockdb_debug', 'Data Loaded Successfully: ' + Object.keys(cloudUsers).length + ' users');
+        }
       }
+      
+      // Construir `mdt_global_state` basado en lo que hay realmente en la base de datos
+      const currentGlobalStr = localStorage.getItem('mdt_global_state');
+      let mergedGlobals = currentGlobalStr ? JSON.parse(currentGlobalStr) : { ...INITIAL_GLOBAL_STATE };
+      
+      // Sobrescribimos el local con la verdad de la nube, preservando Max Supply que está hardcodeado
+      mergedGlobals.circulating = data.mdt_circulante !== null ? data.mdt_circulante : mergedGlobals.circulating;
+      mergedGlobals.minted = data.mdt_circulante !== null ? data.mdt_circulante : mergedGlobals.minted; // Usamos circulante como minted para evitar discrepancias
+      mergedGlobals.usdtVault = data.usdt_vault !== null ? data.usdt_vault : mergedGlobals.usdtVault;
+      mergedGlobals.activeContracts = data.ventas_globales !== null ? data.ventas_globales : mergedGlobals.activeContracts;
+      mergedGlobals.lpBalance = data.lp_balance !== null ? data.lp_balance : mergedGlobals.lpBalance;
+      mergedGlobals.burned = data.quema_global !== null ? data.quema_global : mergedGlobals.burned;
+      
+      localStorage.setItem('mdt_global_state', JSON.stringify(mergedGlobals));
+      
+      window.dispatchEvent(new Event('storage'));
     } else {
-        localStorage.setItem('mockdb_debug', 'No data or usuarios_json is empty {}');
+        localStorage.setItem('mockdb_debug', 'No data row found in contadores1');
     }
   } catch (e) {
-    console.error("Supabase pull users failed", e);
+    console.error("Supabase sync globals failed", e);
     localStorage.setItem('mockdb_debug', 'ERROR: ' + (e.message || String(e)));
   } finally {
     isSyncing = false;
