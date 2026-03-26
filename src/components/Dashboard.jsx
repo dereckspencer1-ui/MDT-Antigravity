@@ -215,7 +215,7 @@ const Dashboard = ({ user }) => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,136,0.05)" vertical={true} />
                 <XAxis dataKey="name" stroke="none" fill="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} tick={{fill: 'rgba(255,255,255,0.4)'}} dy={10} />
                 {/* Dynamically scale the Y axis to the min/max of the data to show extreme volatility in the stress test */}
-                <YAxis stroke="none" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value.toFixed(4)}`} tick={{fill: 'rgba(255,255,255,0.4)'}} dx={-10} domain={['auto', 'auto']} />
+                <YAxis stroke="none" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `$${Number(value).toFixed(4)}`} tick={{fill: 'rgba(255,255,255,0.4)'}} dx={-10} domain={[dataMin => dataMin === dataMax ? Math.max(0, dataMin * 0.9) : 'auto', dataMax => dataMin === dataMax ? dataMax * 1.1 : 'auto']} />
                 <RechartsTooltip contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.9)', borderColor: 'var(--primary)', borderRadius: '8px' }} itemStyle={{ color: '#F59E0B', fontWeight: 'bold' }} labelStyle={{ color: 'rgba(255,255,255,0.6)' }} formatter={(value) => [`$${Number(value).toFixed(4)}`, 'Precio']} />
                 
                 {/* Green Line (Price) */}
