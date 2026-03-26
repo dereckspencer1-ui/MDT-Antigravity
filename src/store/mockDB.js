@@ -458,6 +458,7 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
   // AHORA QUE mdt_users ESTÁ FORMALMENTE GUARDADO Y COMPLETO EN LOCALSTORAGE...
   // ...SUBIMOS EL ESTADO DE CONTADORES A SUPABASE JUNTO CON EL GRAN JSON
   setGlobalState(globals);
+  syncGlobalStateToSupabase(globals);
 
   return true;
 };
