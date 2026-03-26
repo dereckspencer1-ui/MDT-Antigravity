@@ -23,7 +23,7 @@ const Dashboard = ({ user }) => {
   useEffect(() => {
     const fetchSupabaseMetrics = async () => {
       try {
-        const { data, error } = await supabase.from('contadores1').select('mdt_acunado, mdt_quemado, mdt_circulante, mdt_balance, ventas_globales, contador_fomo').limit(1);
+        const { data, error } = await supabase.from('contadores1').select('mdt_circulante, mdt_balance, ventas_globales, contador_fomo').limit(1);
         if (!error && data && data.length > 0) {
            const row = data[0];
            

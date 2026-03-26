@@ -401,6 +401,7 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
       { position: 5, user: user.username, wallet: user.wallet }
     ];
     user.contractList = newList;
+    
     users[userId] = user;
     localStorage.setItem('mdt_users', JSON.stringify(users));
   }
@@ -537,15 +538,14 @@ export const injectMatrixTest = (batchSize, referrerId = null) => {
     let parentId = queue[0];
 
     // Generate a real bot in the database
-    const botId = `BOT_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-    const botWallet = `0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6)}`;
+    const botId = `BOT_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
     users[botId] = {
       id: botId,
-      email: `bot_${botId}@sim.com`,
-      username: `Bot ${botId.split('_')[2]}`,
-      password: '123',
-      wallet: botWallet,
+      email: `b@sim.com`,
+      username: `Bot`,
+      password: '1',
+      wallet: botId.replace('BOT', '0x'),
       referrerId: parentId,
       mdtBalance: 0,
       usdtBalance: 0,
