@@ -436,10 +436,10 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     user.daysRemaining = 365;
 
     const newList = [
-      { position: 1, user: inheritedList[0]?.user || 'Unknown', wallet: inheritedList[0]?.wallet || '0x...' },
-      { position: 2, user: inheritedList[1]?.user || 'Unknown', wallet: inheritedList[1]?.wallet || '0x...' },
-      { position: 3, user: inheritedList[2]?.user || 'Unknown', wallet: inheritedList[2]?.wallet || '0x...' },
-      { position: 4, user: inheritedList[3]?.user || 'Unknown', wallet: inheritedList[3]?.wallet || '0x...' },
+      { position: 1, user: inheritedList[1]?.user || 'Unknown', wallet: inheritedList[1]?.wallet || '0x...' },
+      { position: 2, user: inheritedList[2]?.user || 'Unknown', wallet: inheritedList[2]?.wallet || '0x...' },
+      { position: 3, user: inheritedList[3]?.user || 'Unknown', wallet: inheritedList[3]?.wallet || '0x...' },
+      { position: 4, user: inheritedList[4]?.user || 'Unknown', wallet: inheritedList[4]?.wallet || '0x...' },
       { position: 5, user: user.username, wallet: user.wallet }
     ];
     user.contractList = newList;
