@@ -93,13 +93,7 @@ const Home = () => {
             Continuar
           </button>
         </form>
-        <button 
-            type="button"
-            onClick={() => { if(window.confirm('¿Borrar memoria local de simulador?')) { localStorage.clear(); window.location.href = '/login'; } }}
-            style={{ background: 'transparent', border: 'none', color: '#ff4444', marginTop: '16px', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline', width: '100%', textAlign: 'center' }}
-        >
-            ⚠️ Purgar Simulador Local (Lleno)
-        </button>
+
 
         { (email.toLowerCase().includes('dereckspencer1@gmail.com') || email.toLowerCase().includes('admin@mendigotoken.com') || email.toLowerCase().includes('fundador@mendigotoken.com')) && (
           <div style={{ marginTop: '40px', borderTop: '1px solid rgba(255,0,0,0.3)', paddingTop: '20px' }}>

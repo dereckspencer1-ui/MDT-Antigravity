@@ -196,18 +196,6 @@ const Register = () => {
                             {isProcessing ? 'INICIALIZANDO...' : 'INICIALIZAR GÉNESIS'}
                         </button>
 
-                        <button 
-                            type="button"
-                            onClick={async () => {
-                                if (window.confirm('¿Borrar memoria local de simulador?')) {
-                                    const { resetToGenesis } = await import('../store/mockDB');
-                                    await resetToGenesis();
-                                }
-                            }}
-                            style={{ background: 'transparent', border: 'none', color: '#ff4444', marginTop: '16px', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
-                        >
-                            ⚠️ Purgar Simulador Local (Lleno)
-                        </button>
                     </form>
                 </div>
             ) : (
@@ -247,7 +235,7 @@ const Register = () => {
                         {error && <p style={{ color: 'var(--danger)', fontSize: '12px', marginTop: '8px', textAlign: 'left' }}>{error}</p>}
                         
                         <button type="submit" className="glass-btn" style={{ width: '100%', marginTop: '16px' }} disabled={isProcessing}>
-                            {isProcessing ? 'Procesando...' : 'CREAR CUENTA'} <ChevronRight size={18} />
+                            {isProcessing ? 'Procesando...' : 'CREAR CUENTA'}
                         </button>
 
                         <button 
@@ -258,18 +246,6 @@ const Register = () => {
                             Volver al Inicio
                         </button>
 
-                        <button 
-                            type="button"
-                            onClick={async () => {
-                                if (window.confirm('¿Borrar memoria local de simulador?')) {
-                                    const { resetToGenesis } = await import('../store/mockDB');
-                                    await resetToGenesis();
-                                }
-                            }}
-                            style={{ background: 'transparent', border: 'none', color: '#ff4444', marginTop: '16px', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
-                        >
-                            ⚠️ Purgar Simulador Local (Lleno)
-                        </button>
                     </form>
                 </div>
             )}
