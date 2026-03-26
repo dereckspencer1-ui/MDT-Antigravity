@@ -198,7 +198,12 @@ const Register = () => {
 
                         <button 
                             type="button"
-                            onClick={() => { if(window.confirm('¿Borrar memoria local de simulador?')) { localStorage.clear(); window.location.href = '/login'; } }}
+                            onClick={async () => {
+                                if (window.confirm('¿Borrar memoria local de simulador?')) {
+                                    const { resetToGenesis } = await import('../store/mockDB');
+                                    await resetToGenesis();
+                                }
+                            }}
                             style={{ background: 'transparent', border: 'none', color: '#ff4444', marginTop: '16px', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
                         >
                             ⚠️ Purgar Simulador Local (Lleno)
@@ -255,7 +260,12 @@ const Register = () => {
 
                         <button 
                             type="button"
-                            onClick={() => { if(window.confirm('¿Borrar memoria local de simulador?')) { localStorage.clear(); window.location.href = '/login'; } }}
+                            onClick={async () => {
+                                if (window.confirm('¿Borrar memoria local de simulador?')) {
+                                    const { resetToGenesis } = await import('../store/mockDB');
+                                    await resetToGenesis();
+                                }
+                            }}
                             style={{ background: 'transparent', border: 'none', color: '#ff4444', marginTop: '16px', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
                         >
                             ⚠️ Purgar Simulador Local (Lleno)

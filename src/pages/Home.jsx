@@ -106,10 +106,10 @@ const Home = () => {
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' }}>Herramientas de Desarrollador (Fundador Detectado)</p>
             <button 
               type="button" 
-              onClick={() => {
+              onClick={async () => {
                 if (window.confirm('¿Borrar toda la red y volver al estado vacío (Pre-Génesis)?')) {
-                  localStorage.clear();
-                  window.location.href = '/registro';
+                  const { resetToGenesis } = await import('../store/mockDB');
+                  await resetToGenesis();
                 }
               }}
               style={{ 

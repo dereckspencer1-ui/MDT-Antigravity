@@ -172,10 +172,10 @@ const TopNav = ({ user }) => {
 
             { (user?.email === 'dereckspencer1@gmail.com' || user?.email === 'admin@mendigotoken.com' || user?.email === 'fundador@mendigotoken.com' || user?.username?.toUpperCase() === 'FUNDADOR') && (
                 <button 
-                    onClick={() => {
+                    onClick={async () => {
                         if (window.confirm('¿Borrar toda la red y volver al estado previo al Génesis?')) {
-                            localStorage.clear();
-                            window.location.href = '/registro';
+                            const { resetToGenesis } = await import('../store/mockDB');
+                            await resetToGenesis();
                         }
                     }} 
                     style={{ background: 'rgba(255,0,0,0.1)', border: '1px solid #ff4444', color: '#ff4444', cursor: 'pointer', fontSize: '12px', padding: '0 12px', borderRadius: '4px', height: '40px', display: 'flex', alignItems: 'center' }}>

@@ -23,19 +23,20 @@ const Dashboard = ({ user }) => {
   useEffect(() => {
     const fetchSupabaseMetrics = async () => {
       try {
-        const { data, error } = await supabase.from('contadores1').select('mdt_circulante, mdt_balance, ventas_globales, contador_fomo').limit(1);
+        const { data, error } = await supabase.from('contadores1').select('mdt_circulante, usdt_vault, ventas_globales, contador_fomo, quema_global, lp_balance').limit(1);
         if (!error && data && data.length > 0) {
            const row = data[0];
            
            setMetrics(prev => {
              const updated = {
                  ...prev,
-                 minted: row.mdt_acunado ?? (row.mdt_circulante || prev.minted),
-                 burned: row.mdt_quemado ?? (prev.burned || 0),
+                 minted: row.mdt_circulante ?? prev.minted,
+                 burned: row.quema_global ?? (prev.burned || 0),
                  circulating: row.mdt_circulante ?? prev.circulating,
-                 usdtVault: row.mdt_balance ?? prev.usdtVault,
+                 usdtVault: row.usdt_vault ?? prev.usdtVault,
                  activeContracts: row.ventas_globales ?? prev.activeContracts,
-                 fomoDays: row.contador_fomo ?? prev.fomoDays
+                 fomoDays: row.contador_fomo ?? prev.fomoDays,
+                 lpBalance: row.lp_balance ?? prev.lpBalance
              };
              // Calculamos el valor de 1 MDT en Dólares (Vault / Circulante)
              if (updated.usdtVault > 0 && updated.circulating > 0) {
@@ -49,7 +50,7 @@ const Dashboard = ({ user }) => {
            setPriceHistory(prevHist => {
                // El chart también necesita mostrar el valor en dólares (USD por Token)
                const currentPrice = (row.mdt_circulante > 0) 
-                 ? Number((row.mdt_balance / row.mdt_circulante).toFixed(4)) 
+                 ? Number((row.usdt_vault / row.mdt_circulante).toFixed(4)) 
                  : prevHist[prevHist.length - 1]?.price || 1;
                  
                const newPoint = { name: formatTime(), price: currentPrice };

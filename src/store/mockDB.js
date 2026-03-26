@@ -5,31 +5,35 @@ let syncTimeout = null;
 const syncGlobalStateToSupabase = async (globals) => {
   if (syncTimeout) clearTimeout(syncTimeout);
   
-  // Create a deep copy of globals to avoid mutation by reference during timeout
   const snapshot = JSON.parse(JSON.stringify(globals));
   
-  // Debounce Supabase writes to prevent race conditions during stress testing
-  syncTimeout = setTimeout(async () => {
-    try {
-      const dailyQuota = snapshot.maxSupply / 365;
-      const fomoDaysRemaining = Math.max(0, 365 - Math.floor(snapshot.minted / dailyQuota));
+  try {
+    const dailyQuota = snapshot.maxSupply / 365;
+    const fomoDaysRemaining = Math.max(0, 365 - Math.floor(snapshot.minted / dailyQuota));
 
-      // Prevent hardcoded .eq('id', 1) from silently failing if row ID is different
-      const { data: firstRow } = await supabase.from('contadores1').select('id').limit(1).single();
-      
-      if (firstRow && firstRow.id) {
-        await supabase.from('contadores1').update({
+    const { data: firstRow } = await supabase.from('contadores1').select('*').limit(1).single();
+    
+    if (firstRow) {
+      const idColumn = Object.keys(firstRow).find(key => key.toLowerCase().includes('id')) || 'id';
+      const rowId = firstRow[idColumn];
+
+      if (rowId !== undefined) {
+        const { error } = await supabase.from('contadores1').update({
           mdt_circulante: snapshot.circulating,
-          mdt_balance: snapshot.usdtVault,
+          usdt_vault: snapshot.usdtVault,
           ventas_globales: snapshot.activeContracts,
           contador_fomo: fomoDaysRemaining,
+          quema_global: snapshot.burned || 0,
+          lp_balance: snapshot.lpBalance || 0,
           usuarios_json: localStorage.getItem('mdt_users') || '{}'
-        }).eq('id', firstRow.id);
+        }).eq(idColumn, rowId);
+
+        if (error) console.error("Supabase update error:", error);
       }
-    } catch (e) {
-      console.error("Supabase sync failed", e);
     }
-  }, 200); // 200ms debounce ensures writes happen before the Dashboard opens
+  } catch (e) {
+    console.error("Supabase sync failed:", e);
+  }
 };
 
 let isSyncing = false;
@@ -73,10 +77,33 @@ const setGlobalState = (globals) => {
 
 export const resetToGenesis = async () => {
   localStorage.clear();
+  
+  // EXPLICIT, SYNCHRONOUS AND BRUTE-FORCE CLOUD WIPE TO PREVENT GHOSTS
+  try {
+    const { data: firstRow } = await supabase.from('contadores1').select('*').limit(1).single();
+    if (firstRow) {
+      const idColumn = Object.keys(firstRow).find(key => key.toLowerCase().includes('id')) || 'id';
+      const rowId = firstRow[idColumn];
+      
+      await supabase.from('contadores1').update({
+        mdt_circulante: 0,
+        usdt_vault: 0,
+        ventas_globales: 0,
+        contador_fomo: 365,
+        quema_global: 0,
+        lp_balance: 0,
+        usuarios_json: '{}'
+      }).eq(idColumn, rowId);
+    }
+  } catch (e) {
+    console.error("Critical wipe failed", e);
+  }
+
   initDB();
-  const emptyState = JSON.parse(localStorage.getItem('mdt_global_state'));
-  await syncGlobalStateToSupabase(emptyState);
-  if (typeof window !== 'undefined') window.location.href = '/login';
+  
+  setTimeout(() => {
+    if (typeof window !== 'undefined') window.location.href = '/login';
+  }, 500);
 };
 
 if (typeof window !== 'undefined') {
@@ -394,10 +421,10 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     user.daysRemaining = 365;
 
     const newList = [
-      { position: 1, user: inheritedList[1]?.user || 'Unknown', wallet: inheritedList[1]?.wallet || '0x...' },
-      { position: 2, user: inheritedList[2]?.user || 'Unknown', wallet: inheritedList[2]?.wallet || '0x...' },
-      { position: 3, user: inheritedList[3]?.user || 'Unknown', wallet: inheritedList[3]?.wallet || '0x...' },
-      { position: 4, user: inheritedList[4]?.user || 'Unknown', wallet: inheritedList[4]?.wallet || '0x...' },
+      { position: 1, user: inheritedList[0]?.user || 'Unknown', wallet: inheritedList[0]?.wallet || '0x...' },
+      { position: 2, user: inheritedList[1]?.user || 'Unknown', wallet: inheritedList[1]?.wallet || '0x...' },
+      { position: 3, user: inheritedList[2]?.user || 'Unknown', wallet: inheritedList[2]?.wallet || '0x...' },
+      { position: 4, user: inheritedList[3]?.user || 'Unknown', wallet: inheritedList[3]?.wallet || '0x...' },
       { position: 5, user: user.username, wallet: user.wallet }
     ];
     user.contractList = newList;
