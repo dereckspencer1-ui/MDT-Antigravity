@@ -2,38 +2,40 @@ import { supabase } from '../supabaseClient.js';
 
 let syncTimeout = null;
 
-const syncGlobalStateToSupabase = async (globals) => {
+const syncGlobalStateToSupabase = (globals) => {
   if (syncTimeout) clearTimeout(syncTimeout);
   
   const snapshot = JSON.parse(JSON.stringify(globals));
   
-  try {
-    const dailyQuota = snapshot.maxSupply / 365;
-    const fomoDaysRemaining = Math.max(0, 365 - Math.floor(snapshot.minted / dailyQuota));
+  syncTimeout = setTimeout(async () => {
+    try {
+      const dailyQuota = snapshot.maxSupply / 365;
+      const fomoDaysRemaining = Math.max(0, 365 - Math.floor(snapshot.minted / dailyQuota));
 
-    const { data: firstRow } = await supabase.from('contadores1').select('*').limit(1).single();
-    
-    if (firstRow) {
-      const idColumn = Object.keys(firstRow).find(key => key.toLowerCase().includes('id')) || 'id';
-      const rowId = firstRow[idColumn];
+      const { data: firstRow } = await supabase.from('contadores1').select('*').limit(1).single();
+      
+      if (firstRow) {
+        const idColumn = Object.keys(firstRow).find(key => key.toLowerCase().includes('id')) || 'id';
+        const rowId = firstRow[idColumn];
 
-      if (rowId !== undefined) {
-        const { error } = await supabase.from('contadores1').update({
-          mdt_circulante: snapshot.circulating,
-          usdt_vault: snapshot.usdtVault,
-          ventas_globales: snapshot.activeContracts,
-          contador_fomo: fomoDaysRemaining,
-          quema_global: snapshot.burned || 0,
-          lp_balance: snapshot.lpBalance || 0,
-          usuarios_json: localStorage.getItem('mdt_users') || '{}'
-        }).eq(idColumn, rowId);
+        if (rowId !== undefined) {
+          const { error } = await supabase.from('contadores1').update({
+            mdt_circulante: snapshot.circulating,
+            usdt_vault: snapshot.usdtVault,
+            ventas_globales: snapshot.activeContracts,
+            contador_fomo: fomoDaysRemaining,
+            quema_global: snapshot.burned || 0,
+            lp_balance: snapshot.lpBalance || 0,
+            usuarios_json: localStorage.getItem('mdt_users') || '{}'
+          }).eq(idColumn, rowId);
 
-        if (error) console.error("Supabase update error:", error);
+          if (error) console.error("Supabase update error:", error);
+        }
       }
+    } catch (e) {
+      console.error("Supabase sync failed:", e);
     }
-  } catch (e) {
-    console.error("Supabase sync failed:", e);
-  }
+  }, 1000);
 };
 
 let isSyncing = false;
