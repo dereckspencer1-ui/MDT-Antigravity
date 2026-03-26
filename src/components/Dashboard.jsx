@@ -465,33 +465,10 @@ const Dashboard = ({ user }) => {
                     {Math.round(metrics.burned || 0).toLocaleString()} MDT
                 </span>
             </div>
-          </div>
-       </div>
-
-       {/* SALDOS DE USUARIOS */}
-       {userBalances.length > 0 && (
-         <div className="glass-panel" style={{ padding: '20px', marginTop: '24px' }}>
-           <h3 style={{ fontSize: '16px', color: '#F59E0B', marginBottom: '12px' }}>SALDOS DE USUARIOS</h3>
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
-             {userBalances.map((u, idx) => (
-               <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                 <div style={{ fontWeight: 'bold', color: '#F59E0B', fontSize: '14px' }}>{u.username}</div>
-                 <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}>{u.wallet?.substring(0, 8)}...</div>
-                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                   <span>Saldo:</span>
-                   <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{u.mdtBalance?.toFixed(2)} MDT</span>
-                 </div>
-                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                   <span>Ventas:</span>
-                   <span>{u.activeContractSales || 0}</span>
-                 </div>
-               </div>
-             ))}
            </div>
-         </div>
-       )}
-     </div>
-   );
- };
+        </div>
+      </div>
+    );
+  };
 
- export default Dashboard;
+  export default Dashboard;
