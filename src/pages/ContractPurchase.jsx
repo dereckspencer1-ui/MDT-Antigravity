@@ -8,9 +8,9 @@ const ContractPurchase = ({ user }) => {
     const [isPurchasing, setIsPurchasing] = useState(false);
     const [error, setError] = useState('');
 
-    const handlePurchase = async () => {
+    const handlePurchase = () => {
         setIsPurchasing(true);
-        const success = await purchaseContract(user.wallet);
+        const success = purchaseContract(user.wallet);
         
         if (success) {
             setTimeout(() => {

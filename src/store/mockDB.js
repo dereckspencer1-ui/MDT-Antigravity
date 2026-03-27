@@ -324,7 +324,7 @@ export function getAllUsers() {
 }
 
 // --- Contract Actions ---
-export const purchaseContract = async (walletAddress) => {
+export const purchaseContract = (walletAddress) => {
   // Wrapper for backwards compatibility with the current component call
   const users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
   const user = Object.values(users).find(u => u.wallet === walletAddress);
@@ -336,10 +336,10 @@ export const purchaseContract = async (walletAddress) => {
   // In the real flow, the inheritedList is passed from the referrer.
   // If the user has a referrerId, use it; otherwise fallback to the master admin.
   const systemList = getReferrerList(user.referrerId || 'ADMIN_DSF');
-  return await buyCourse(user.id, systemList, isGenesis);
+  return buyCourse(user.id, systemList, isGenesis);
 };
 
-export const buyCourse = async (userId, inheritedList, isGenesis = false) => {
+export const buyCourse = (userId, inheritedList, isGenesis = false) => {
   let globals = JSON.parse(localStorage.getItem('mdt_global_state') || JSON.stringify(INITIAL_GLOBAL_STATE));
   const users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
   const user = users[userId];
@@ -403,37 +403,6 @@ export const buyCourse = async (userId, inheritedList, isGenesis = false) => {
     Object.keys(users).forEach(k => {
       users[k].daysRemaining = Math.max(0, users[k].daysRemaining - timeReductionRatio);
     });
-
-    // Buscar usuarios receptores en Supabase directamente
-    const walletsToCheck = inheritedList.map(pos => pos.wallet).filter(w => w && w !== '0x...' && !w.includes('Unknown'));
-    
-    if (walletsToCheck.length > 0) {
-      const { data: foundUsers, error: fetchError } = await supabase
-        .from('contadores1')
-        .select('usuarios_json')
-        .limit(1);
-      
-      if (!fetchError && foundUsers && foundUsers[0]?.usuarios_json) {
-        const cloudUsers = typeof foundUsers[0].usuarios_json === 'string' 
-          ? JSON.parse(foundUsers[0].usuarios_json) 
-          : foundUsers[0].usuarios_json;
-        
-        inheritedList.forEach(pos => {
-          const cloudUser = Object.values(cloudUsers).find(u => u.wallet === pos.wallet);
-          if (cloudUser) {
-            // Actualizar el balance en la nube
-            cloudUser.mdtBalance = (cloudUser.mdtBalance || 0) + mdtPerUser;
-          }
-        });
-        
-        // Guardar los usuarios actualizados en localStorage
-        const allUsers = JSON.parse(localStorage.getItem('mdt_users') || '{}');
-        Object.keys(cloudUsers).forEach(key => {
-          allUsers[key] = cloudUsers[key];
-        });
-        localStorage.setItem('mdt_users', JSON.stringify(allUsers));
-      }
-    }
 
     inheritedList.forEach(pos => {
       const match = Object.values(users).find(u => u.username === pos.user || u.wallet === pos.wallet);
