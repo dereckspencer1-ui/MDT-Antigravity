@@ -30,12 +30,40 @@ const syncGlobalStateToSupabase = (globals) => {
           }).eq(idColumn, rowId);
 
           if (error) console.error("Supabase update error:", error);
+          
+          // También sincronizar a tabla de usuarios
+          syncUsersToSupabaseTable();
         }
       }
     } catch (e) {
       console.error("Supabase sync failed:", e);
     }
   }, 1000);
+};
+
+const syncUsersToSupabaseTable = async () => {
+  try {
+    const users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
+    const usersArray = Object.values(users);
+    
+    if (usersArray.length === 0) return;
+    
+    const usersToSync = usersArray.map(u => ({
+      wallet: u.wallet,
+      username: u.username,
+      email: u.email,
+      referrer_id: u.referrerId || null,
+      mdt_balance: u.mdtBalance || 0,
+      ventas_contrato: u.activeContractSales || 0,
+      completed_contracts: u.completedContracts || 0,
+      contract_status: u.contractStatus || 'PENDING'
+    }));
+    
+    const { error } = await supabase.from('usuarios').upsert(usersToSync, { onConflict: 'wallet' });
+    if (error) console.error("Error sync users table:", error);
+  } catch (e) {
+    console.error("Sync users table failed:", e);
+  }
 };
 
 let isSyncing = false;
