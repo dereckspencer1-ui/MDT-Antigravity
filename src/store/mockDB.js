@@ -19,6 +19,7 @@ const syncGlobalStateToSupabase = (globals) => {
         const rowId = firstRow[idColumn];
 
         if (rowId !== undefined) {
+          const usuariosJsonToUpload = snapshot.pendingUsersJson || localStorage.getItem('mdt_users') || '{}';
           const { error } = await supabase.from('contadores1').update({
             mdt_circulante: snapshot.circulating,
             usdt_vault: snapshot.usdtVault,
@@ -26,8 +27,13 @@ const syncGlobalStateToSupabase = (globals) => {
             contador_fomo: fomoDaysRemaining,
             quema_global: snapshot.burned || 0,
             lp_balance: snapshot.lpBalance || 0,
-            usuarios_json: localStorage.getItem('mdt_users') || '{}'
+            usuarios_json: usuariosJsonToUpload
           }).eq(idColumn, rowId);
+
+          // Limpiar pendingUsersJson después de sincronizar
+          if (snapshot.pendingUsersJson) {
+            delete snapshot.pendingUsersJson;
+          }
 
           if (error) console.error("Supabase update error:", error);
         }
@@ -324,7 +330,7 @@ export function getAllUsers() {
 }
 
 // --- Contract Actions ---
-export const purchaseContract = (walletAddress) => {
+export const purchaseContract = async (walletAddress) => {
   // Wrapper for backwards compatibility with the current component call
   const users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
   const user = Object.values(users).find(u => u.wallet === walletAddress);
@@ -336,10 +342,10 @@ export const purchaseContract = (walletAddress) => {
   // In the real flow, the inheritedList is passed from the referrer.
   // If the user has a referrerId, use it; otherwise fallback to the master admin.
   const systemList = getReferrerList(user.referrerId || 'ADMIN_DSF');
-  return buyCourse(user.id, systemList, isGenesis);
+  return await buyCourse(user.id, systemList, isGenesis);
 };
 
-export const buyCourse = (userId, inheritedList, isGenesis = false) => {
+export const buyCourse = async (userId, inheritedList, isGenesis = false) => {
   let globals = JSON.parse(localStorage.getItem('mdt_global_state') || JSON.stringify(INITIAL_GLOBAL_STATE));
   const users = JSON.parse(localStorage.getItem('mdt_users') || '{}');
   const user = users[userId];
@@ -403,6 +409,34 @@ export const buyCourse = (userId, inheritedList, isGenesis = false) => {
     Object.keys(users).forEach(k => {
       users[k].daysRemaining = Math.max(0, users[k].daysRemaining - timeReductionRatio);
     });
+
+    // Buscar usuarios receptores en Supabase directamente - solo lee, no modifica localStorage
+    const walletsToCheck = inheritedList.map(pos => pos.wallet).filter(w => w && w !== '0x...' && !w.includes('Unknown'));
+    
+    if (walletsToCheck.length > 0) {
+      // Leer usuarios desde Supabase
+      const { data: row, error: fetchError } = await supabase
+        .from('contadores1')
+        .select('usuarios_json')
+        .limit(1);
+      
+      if (!fetchError && row && row[0]?.usuarios_json) {
+        const cloudUsers = typeof row[0].usuarios_json === 'string' 
+          ? JSON.parse(row[0].usuarios_json) 
+          : row[0].usuarios_json;
+        
+        // Actualizar balances en memoria (no en localStorage)
+        inheritedList.forEach(pos => {
+          const cloudUser = Object.values(cloudUsers).find(u => u.wallet === pos.wallet);
+          if (cloudUser) {
+            cloudUser.mdtBalance = (cloudUser.mdtBalance || 0) + mdtPerUser;
+          }
+        });
+        
+        // Actualizar usuarios_json en memoria para sincronizar a Supabase después
+        globals.pendingUsersJson = JSON.stringify(cloudUsers);
+      }
+    }
 
     inheritedList.forEach(pos => {
       const match = Object.values(users).find(u => u.username === pos.user || u.wallet === pos.wallet);
