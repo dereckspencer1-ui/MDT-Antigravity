@@ -73,22 +73,37 @@ export const syncUsersFromSupabase = async () => {
   if (isSyncing) return;
   isSyncing = true;
   try {
-    // Bajar usuarios JSON y todos los contadores globales para que los navegadores frescos no sobrescriban la DB con 0
+    // Leer usuarios de la nueva tabla
+    const { data: usersData, error: usersError } = await supabase.from('usuarios').select('*');
+    
+    if (!usersError && usersData && usersData.length > 0) {
+      const cloudUsers = {};
+      usersData.forEach(u => {
+        cloudUsers[u.wallet] = {
+          id: u.wallet,
+          username: u.username,
+          email: u.email,
+          wallet: u.wallet,
+          referrerId: u.referrer_id,
+          mdtBalance: u.mdt_balance || 0,
+          usdtBalance: 0,
+          contractStatus: u.contract_status || 'PENDING',
+          activeContractSales: u.ventas_contrato || 0,
+          completedContracts: u.completed_contracts || 0
+        };
+      });
+      
+      if (Object.keys(cloudUsers).length > 0) {
+        const localUsers = JSON.parse(localStorage.getItem('mdt_users') || '{}');
+        const mergedUsers = { ...cloudUsers, ...localUsers };
+        localStorage.setItem('mdt_users', JSON.stringify(mergedUsers));
+        localStorage.setItem('mockdb_debug', 'Data Loaded Successfully: ' + Object.keys(cloudUsers).length + ' users');
+      }
+    }
+    
+    // Leer contadores globales
     const { data, error } = await supabase.from('contadores1').select('*').limit(1).single();
     if (data) {
-      if (data.usuarios_json && data.usuarios_json !== '{}') {
-        const rawPayload = data.usuarios_json;
-        const cloudUsers = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
-        
-        if (cloudUsers && Object.keys(cloudUsers).length > 0) {
-          const localUsers = JSON.parse(localStorage.getItem('mdt_users') || '{}');
-          const mergedUsers = { ...cloudUsers, ...localUsers };
-          localStorage.setItem('mdt_users', JSON.stringify(mergedUsers));
-          localStorage.setItem('mockdb_debug', 'Data Loaded Successfully: ' + Object.keys(cloudUsers).length + ' users');
-        }
-      }
-      
-      // Construir `mdt_global_state` basado en lo que hay realmente en la base de datos
       const currentGlobalStr = localStorage.getItem('mdt_global_state');
       let mergedGlobals = currentGlobalStr ? JSON.parse(currentGlobalStr) : { ...INITIAL_GLOBAL_STATE };
       
