@@ -24,9 +24,14 @@ const Dashboard = ({ user }) => {
   useEffect(() => {
     const fetchSupabaseMetrics = async () => {
       try {
-        const { data, error } = await supabase.from('contadores1').select('mdt_circulante, usdt_vault, ventas_globales, contador_fomo, quema_global, lp_balance, usuarios_json').limit(1);
-        if (!error && data && data.length > 0) {
-           const row = data[0];
+        // Fetch contadores globales
+        const { data: metricsData, error: metricsError } = await supabase.from('contadores1').select('mdt_circulante, usdt_vault, ventas_globales, contador_fomo, quema_global, lp_balance').limit(1);
+        
+        // Fetch usuarios de la nueva tabla
+        const { data: usersData, error: usersError } = await supabase.from('usuarios').select('*');
+        
+        if (!metricsError && metricsData && metricsData.length > 0) {
+           const row = metricsData[0];
            
            setMetrics(prev => {
              const updated = {
@@ -39,47 +44,40 @@ const Dashboard = ({ user }) => {
                  fomoDays: row.contador_fomo ?? prev.fomoDays,
                  lpBalance: row.lp_balance ?? prev.lpBalance
              };
-             // Calculamos el valor de 1 MDT en Dólares (Vault / Circulante)
              if (updated.usdtVault > 0 && updated.circulating > 0) {
                  updated.currentPrice = (updated.usdtVault / updated.circulating).toFixed(4);
                  updated.backing = updated.currentPrice; 
              }
               return updated;
            });
-           
-           // Extraer balances individuales de usuarios_json
-           if (row.usuarios_json) {
-             try {
-               const usersData = typeof row.usuarios_json === 'string' ? JSON.parse(row.usuarios_json) : row.usuarios_json;
-               const usersArray = Object.values(usersData).map(u => ({
-                 username: u.username,
-                 wallet: u.wallet,
-                 mdtBalance: u.mdtBalance || 0,
-                 contractStatus: u.contractStatus || 'PENDING',
-                 activeContractSales: u.activeContractSales || 0,
-                 completedContracts: u.completedContracts || 0
-               }));
-               setUserBalances(usersArray);
-             } catch (e) {
-               console.error("Error parsing usuarios_json:", e);
-             }
-           }
-           
-           // Update chart
-           setPriceHistory(prevHist => {
-               // El chart también necesita mostrar el valor en dólares (USD por Token)
-               const currentPrice = (row.mdt_circulante > 0) 
-                 ? Number((row.usdt_vault / row.mdt_circulante).toFixed(4)) 
-                 : prevHist[prevHist.length - 1]?.price || 1;
-                 
-               const newPoint = { name: formatTime(), price: currentPrice };
-               const updated = [...prevHist, newPoint];
-               return updated.length > 20 ? updated.slice(updated.length - 20) : updated;
-           });
-         }
-       } catch (e) {
-         console.error("Supabase fetch error:", e);
-       }
+        }
+        
+        // Extraer balances de la tabla usuarios
+        if (!usersError && usersData) {
+          const usersArray = usersData.map(u => ({
+            username: u.username,
+            wallet: u.wallet,
+            mdtBalance: u.mdt_balance || 0,
+            contractStatus: u.contract_status || 'PENDING',
+            activeContractSales: u.ventas_contrato || 0,
+            completedContracts: u.completed_contracts || 0
+          }));
+          setUserBalances(usersArray);
+        }
+        
+        // Update chart
+        setPriceHistory(prevHist => {
+            const currentPrice = (metricsData?.[0]?.mdt_circulante > 0) 
+              ? Number((metricsData[0].usdt_vault / metricsData[0].mdt_circulante).toFixed(4)) 
+              : prevHist[prevHist.length - 1]?.price || 1;
+              
+            const newPoint = { name: formatTime(), price: currentPrice };
+            const updated = [...prevHist, newPoint];
+            return updated.length > 20 ? updated.slice(updated.length - 20) : updated;
+        });
+      } catch (e) {
+        console.error("Supabase fetch error:", e);
+      }
     };
 
     const interval = setInterval(() => {
