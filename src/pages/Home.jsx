@@ -7,6 +7,7 @@ import YinYang from '../components/YinYang';
 const Home = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -18,27 +19,34 @@ const Home = () => {
     return () => window.removeEventListener('theme-changed', handleThemeChange);
   }, []);
 
-  const handleNext = (e) => {
+  const handleNext = async (e) => {
     e.preventDefault();
     if (!email.includes('@')) {
       setError('Por favor ingresa un correo electrónico válido.');
       return;
     }
 
-    const existingUser = getUserByEmail(email);
+    setIsProcessing(true);
+    try {
+        const existingUser = await getUserByEmail(email);
 
-    if (existingUser) {
-      // Pass the email to the Login page
-      navigate('/login', { state: { email } });
-    } else {
-      // Extraemos el parámetro ref si existe
-      const searchParams = new URLSearchParams(location.search);
-      const referralId = searchParams.get('ref');
-      
-      const registerPath = referralId ? `/register?ref=${referralId}` : '/register';
+        if (existingUser) {
+          // Pass the email to the Login page
+          navigate('/login', { state: { email } });
+        } else {
+          // Extraemos el parámetro ref si existe
+          const searchParams = new URLSearchParams(location.search);
+          const referralId = searchParams.get('ref');
+          
+          const registerPath = referralId ? `/register?ref=${referralId}` : '/register';
 
-      // Pass the email to the Register page
-      navigate(registerPath, { state: { email } });
+          // Pass the email to the Register page
+          navigate(registerPath, { state: { email } });
+        }
+    } catch (err) {
+        setError('Error de conexión.');
+    } finally {
+        setIsProcessing(false);
     }
   };
 
@@ -89,8 +97,8 @@ const Home = () => {
             />
             {error && <p style={{ color: 'var(--danger)', fontSize: '12px', marginTop: '8px', textAlign: 'left' }}>{error}</p>}
           </div>
-          <button type="submit" className="glass-btn" style={{ width: '100%' }}>
-            Continuar
+          <button type="submit" className="glass-btn" style={{ width: '100%' }} disabled={isProcessing}>
+            {isProcessing ? 'Procesando...' : 'Continuar'}
           </button>
         </form>
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { getCurrentUser, getMdtData, syncUsersFromSupabase } from './store/mockDB';
+import { getCurrentUser } from './store/mockDB';
 
 // Pages
 import Home from './pages/Home';
@@ -15,8 +15,7 @@ function App() {
   const [user, setUser] = useState(getCurrentUser());
 
   useEffect(() => {
-    // 0. Pull global entire network tree from cloud on app boot
-    syncUsersFromSupabase();
+    // 0. (Removed syncUsersFromSupabase as we now use direct DB calls)
 
     // Theme initialization
     const savedTheme = localStorage.getItem('mdt_theme') || 'dark';
@@ -70,6 +69,28 @@ function App() {
       }
     }
   }, [user, location.pathname, navigate]);
+
+  // 3. Keep current user synced with DB state (commissions, balances)
+  useEffect(() => {
+    if (!user) return;
+    const syncInterval = setInterval(async () => {
+      try {
+        const { supabase } = await import('./supabaseClient');
+        const { data } = await supabase.from('mdt_users').select('*').eq('id', user.id).single();
+        if (data) {
+          // Compare balance and sales to avoid unnecessary updates
+          if (data.mdtBalance !== user.mdtBalance || data.activeContractSales !== user.activeContractSales || data.contractStatus !== user.contractStatus) {
+            localStorage.setItem('mdt_current_user', JSON.stringify(data));
+            setUser(data);
+            window.dispatchEvent(new Event('storage'));
+          }
+        }
+      } catch (e) {
+        // ignore network error
+      }
+    }, 2000);
+    return () => clearInterval(syncInterval);
+  }, [user]);
 
   return (
     <Routes>

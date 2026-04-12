@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getGlobalMetrics, injectMatrixTest } from '../store/mockDB';
+import { injectMatrixTest } from '../store/mockDB';
 import { supabase } from '../supabaseClient';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Zap } from 'lucide-react';
@@ -13,9 +13,20 @@ const formatTime = () => {
 };
 
 const Dashboard = ({ user }) => {
-  const [metrics, setMetrics] = useState(getGlobalMetrics());
+  const [metrics, setMetrics] = useState({
+      minted: 0,
+      maxSupply: 66600000,
+      circulating: 0,
+      burned: 0,
+      usdtVault: 0,
+      activeContracts: 0,
+      fomoDays: 365,
+      lpBalance: 0,
+      currentPrice: 1.00,
+      backing: 1.00
+  });
   const [priceHistory, setPriceHistory] = useState([
-      { name: formatTime(), price: Number(getGlobalMetrics().currentPrice) }
+      { name: formatTime(), price: 1.00 }
   ]);
   const [msg, setMsg] = useState({ type: '', text: '' });
   const [testUsed, setTestUsed] = useState(false);
@@ -84,7 +95,7 @@ const Dashboard = ({ user }) => {
 
     const interval = setInterval(() => {
       fetchSupabaseMetrics();
-    }, 5000);
+    }, 2000);
     
     // Initial fetch
     fetchSupabaseMetrics();
@@ -127,20 +138,12 @@ const Dashboard = ({ user }) => {
           injectMatrixTest(batchSize, 'ADMIN_DSF');
           purchasesMade += batchSize;
           
-          // Force UI refresh with new metrics
-          const newMetrics = getGlobalMetrics();
-          setMetrics(newMetrics);
-          
           // Trigger storage event so App.jsx updates the `user` prop (shows incoming money dynamically)
           window.dispatchEvent(new Event('storage'));
           
-          // Update Chart
-          setPriceHistory(prev => {
-              const newPoint = { name: formatTime(), price: Number(newMetrics.currentPrice) };
-              const updated = [...prev, newPoint];
-              if (updated.length > 20) return updated.slice(updated.length - 20);
-              return updated;
-          });
+          // Force a fetch to update the charts
+          // Since fetchSupabaseMetrics is defined in useEffect, we'll just wait for the interval
+          // or we can dispatch an event if needed. The 5s interval is fine.
       }, 800); // Trigger slightly faster for visual effect (0.8s) 
   };
 
@@ -235,7 +238,7 @@ const Dashboard = ({ user }) => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,136,0.05)" vertical={true} />
                 <XAxis dataKey="name" stroke="none" fill="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} tick={{fill: 'rgba(255,255,255,0.4)'}} dy={10} />
                 {/* Dynamically scale the Y axis to the min/max of the data to show extreme volatility in the stress test */}
-                <YAxis stroke="none" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `$${Number(value).toFixed(4)}`} tick={{fill: 'rgba(255,255,255,0.4)'}} dx={-10} domain={[dataMin => dataMin === dataMax ? Math.max(0, dataMin * 0.9) : 'auto', dataMax => dataMin === dataMax ? dataMax * 1.1 : 'auto']} />
+                <YAxis stroke="none" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `$${Number(value).toFixed(4)}`} tick={{fill: 'rgba(255,255,255,0.4)'}} dx={-10} domain={[(dataMin) => dataMin * 0.95, (dataMax) => dataMax * 1.05]} />
                 <RechartsTooltip contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.9)', borderColor: 'var(--primary)', borderRadius: '8px' }} itemStyle={{ color: '#F59E0B', fontWeight: 'bold' }} labelStyle={{ color: 'rgba(255,255,255,0.6)' }} formatter={(value) => [`$${Number(value).toFixed(4)}`, 'Precio']} />
                 
                 {/* Green Line (Price) */}

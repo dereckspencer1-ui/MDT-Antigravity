@@ -8,16 +8,20 @@ const ContractPurchase = ({ user }) => {
     const [isPurchasing, setIsPurchasing] = useState(false);
     const [error, setError] = useState('');
 
-    const handlePurchase = () => {
+    const handlePurchase = async () => {
         setIsPurchasing(true);
-        const success = purchaseContract(user.wallet);
-        
-        if (success) {
-            setTimeout(() => {
-                navigate('/dashboard'); // Go to dashboard!
-            }, 1000);
-        } else {
-            setError('Error al procesar el contrato.');
+        try {
+            const success = await purchaseContract(user.wallet);
+            if (success) {
+                setTimeout(() => {
+                    navigate('/dashboard'); // Go to dashboard!
+                }, 1000);
+            } else {
+                setError('Error al procesar el contrato.');
+                setIsPurchasing(false);
+            }
+        } catch (e) {
+            setError(e.message || 'Error de procesamiento.');
             setIsPurchasing(false);
         }
     };

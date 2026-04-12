@@ -27,20 +27,20 @@ const MyNetwork = ({ user, metrics }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (Number(sendAmount) <= 0) return;
     try {
-      sendMDT(user.id, sendEmail, Number(sendAmount));
+      await sendMDT(user.id, sendEmail, Number(sendAmount));
       alert(`Enviados ${sendAmount} MDT a ${sendEmail}`);
       setSendAmount('');
       setSendEmail('');
     } catch (err) {
-      alert(err.message);
+      alert(err.message || 'Error en transferencia');
     }
   };
 
-  const handleWithdraw = (e) => {
+  const handleWithdraw = async (e) => {
     e.preventDefault();
     const amountToWithdraw = localUser.mdtBalance || 0;
     if (amountToWithdraw <= 0) {
@@ -51,10 +51,9 @@ const MyNetwork = ({ user, metrics }) => {
     if (!window.confirm(`¿Estás seguro de que deseas retirar la totalidad de tus MDTs (${amountToWithdraw.toFixed(4)} MDT)?`)) return;
 
     try {
-      import('../store/mockDB').then(({ withdrawMDT }) => {
-          const usdtReceived = withdrawMDT(user.id, amountToWithdraw);
-          alert(`¡Retiro Exitoso! Has quemado la totalidad de tus MDT (${amountToWithdraw.toFixed(4)} MDT).\nHas recibido $${usdtReceived.toFixed(2)} USDT en tu Billetera Externa.`);
-      });
+      const { withdrawMDT } = await import('../store/mockDB');
+      const usdtReceived = await withdrawMDT(user.id, amountToWithdraw);
+      alert(`¡Retiro Exitoso! Has quemado la totalidad de tus MDT (${amountToWithdraw.toFixed(4)} MDT).\nHas recibido $${usdtReceived.toFixed(2)} USDT en tu Billetera Externa.`);
     } catch (err) {
       alert(err.message || 'Error processing withdrawal');
     }
@@ -189,9 +188,37 @@ const MyNetwork = ({ user, metrics }) => {
                <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>
                    TU DIRECCIÓN DE BILLETERA (RECEPTOR)
                </h4>
-               <p style={{ fontFamily: 'monospace', fontSize: '18px', color: 'var(--primary)', fontWeight: 'bold', margin: '8px 0 0 0', wordBreak: 'break-all' }}>
-                   {localUser?.wallet}
-               </p>
+               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', background: 'rgba(2, 6, 23, 0.5)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(0, 255, 136, 0.2)', marginTop: '16px' }}>
+                   <p style={{ fontFamily: 'monospace', fontSize: '15px', color: 'var(--primary)', fontWeight: 'bold', margin: '0', wordBreak: 'break-all' }}>
+                       {localUser?.wallet}
+                   </p>
+                   <button 
+                       onClick={(e) => {
+                           e.preventDefault();
+                           navigator.clipboard.writeText(localUser?.wallet);
+                           e.target.innerText = 'COPIADO';
+                           e.target.style.background = 'var(--primary)';
+                           e.target.style.color = '#000';
+                           setTimeout(() => {
+                               e.target.innerText = 'COPIAR';
+                               e.target.style.background = 'rgba(0, 255, 136, 0.1)';
+                               e.target.style.color = 'var(--primary)';
+                           }, 2000);
+                       }} 
+                       className="glass-btn" 
+                       style={{ 
+                           padding: '8px 16px', 
+                           background: 'rgba(0, 255, 136, 0.1)', 
+                           color: 'var(--primary)',
+                           border: '1px solid var(--primary)',
+                           borderRadius: '8px',
+                           cursor: 'pointer',
+                           fontWeight: 'bold'
+                       }}
+                   >
+                       COPIAR
+                   </button>
+               </div>
            </div>
 
            {/* QUEMA */}
@@ -220,7 +247,7 @@ const MyNetwork = ({ user, metrics }) => {
                   <Send size={24} color="#3B82F6" /> Enlace P2P Red Interna
               </h4>
               <form onSubmit={handleSend} style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
-                 <input type="email" value={sendEmail} onChange={e => setSendEmail(e.target.value)} placeholder="Dirección Email o Wallet Destino" className="glass-input" style={{ padding: '16px', borderRadius: '8px', fontSize: '16px' }} required />
+                 <input type="text" value={sendEmail} onChange={e => setSendEmail(e.target.value)} placeholder="Dirección Email o Wallet Destino" className="glass-input" style={{ padding: '16px', borderRadius: '8px', fontSize: '16px' }} required />
                  <div style={{ position: 'relative' }}>
                      <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#3B82F6', fontWeight: 'bold' }}>$</span>
                      <input type="number" min="0.1" step="0.1" value={sendAmount} onChange={e => setSendAmount(e.target.value)} placeholder="0.00 MDT" className="glass-input" style={{ width: '100%', padding: '16px 16px 16px 40px', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold', color: '#3B82F6' }} required />

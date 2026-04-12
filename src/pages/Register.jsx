@@ -26,7 +26,7 @@ const Register = () => {
     const [inviter, setInviter] = useState(null);
     const [error, setError] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [userCount, setUserCount] = useState(getAllUsers().length);
+    const [userCount, setUserCount] = useState(0);
     const [isSyncing, setIsSyncing] = useState(getSyncStatus());
     const [debugInfo, setDebugInfo] = useState('');
     
@@ -40,26 +40,33 @@ const Register = () => {
 
     useEffect(() => {
         // Function to check inviter either on mount or when Supabase finishes downloading the users
-        const checkInviter = () => {
-            if (referralId) {
-                const users = getAllUsers();
-                const foundInviter = users.find(u => 
-                    u.wallet === referralId || 
-                    u.id === referralId || 
-                    u.username.toLowerCase() === referralId.toLowerCase()
-                );
-                if (foundInviter) {
-                    setInviter(foundInviter);
+        const checkInviter = async () => {
+            try {
+                const users = await getAllUsers();
+                setUserCount(users.length);
+
+                if (referralId) {
+                    const foundInviter = users.find(u => 
+                        u.wallet === referralId || 
+                        u.id === referralId || 
+                        u.username.toLowerCase() === referralId.toLowerCase()
+                    );
+                    if (foundInviter) {
+                        setInviter(foundInviter);
+                    }
                 }
+            } catch (err) {
+                console.error(err);
+                setError(err.message || "Error al conectar con la base de datos");
+                setUserCount(-1);
             }
         };
 
         checkInviter();
 
         // When App.jsx finishes fetching 'usuarios_json' from Supabase, it fires 'storage'
-        const handleStorage = () => {
-            checkInviter();
-            setUserCount(getAllUsers().length);
+        const handleStorage = async () => {
+            await checkInviter();
             setIsSyncing(getSyncStatus());
             const debugLog = localStorage.getItem('mockdb_debug') || '';
             if (debugLog) setDebugInfo(debugLog);
@@ -87,13 +94,13 @@ const Register = () => {
         });
     };
 
-    const handleRegister = (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault();
         
         if (isProcessing) return;
         setIsProcessing(true);
 
-        const users = getAllUsers();
+        const users = await getAllUsers();
         
         // GENESIS BLOCK AUTHORIZATION CHECK
         if (users.length === 0) {
@@ -129,14 +136,15 @@ const Register = () => {
         }
 
         // Generate a mock wallet if none provided (for demo purposes)
-        const mockWallet = formData.wallet || `0x${Math.random().toString(16).slice(2, 10)}...demo`;
+        const mockWallet = formData.wallet || `0x${Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('')}`;
 
         // Register the user
-        const newUser = registerUser(
+        const newUser = await registerUser(
             formData.email,
             formData.username,
             formData.password,
-            inviter ? inviter.id : null
+            inviter ? inviter.id : null,
+            mockWallet
         );
 
         if (newUser && !newUser.error) {
@@ -159,8 +167,14 @@ const Register = () => {
                     <h3 style={{ color: 'var(--text-main)', fontSize: '20px' }}>Sincronizando Nodo...</h3>
                     <p style={{ color: 'var(--text-muted)' }}>Cargando participantes globales de la red MDT.</p>
                 </div>
+            ) : userCount === -1 ? (
+                <div className="glass-panel" style={{ padding: '60px', maxWidth: '500px', width: '100%', textAlign: 'center', background: 'rgba(51, 0, 0, 0.4)', border: '1px solid #ff4444' }}>
+                    <Shield size={64} color="#ff4444" style={{ marginBottom: '24px' }} />
+                    <h2 style={{ fontSize: '24px', marginBottom: '16px', color: '#ff4444' }}>Fallo de Conexión</h2>
+                    <p style={{ color: 'var(--text-muted)' }}>No pudimos conectar con Supabase. Asegúrate de tener configurado correctamente el archivo <strong>.env</strong> con una base de datos válida.</p>
+                    <p style={{ color: '#ff4444', fontSize: '13px', marginTop: '16px' }}>{error}</p>
+                </div>
             ) : userCount === 0 ? (
-                <div className="glass-panel" style={{ padding: '60px', maxWidth: '500px', width: '100%', textAlign: 'center', background: 'rgba(0, 51, 20, 0.4)' }}>
                     <Shield size={64} color="var(--primary)" style={{ marginBottom: '24px' }} />
                     {debugInfo && (
                         <div style={{ background: 'rgba(255, 255, 0, 0.1)', border: '1px solid #FFD700', padding: '10px', borderRadius: '4px', marginBottom: '16px', fontSize: '11px', color: '#FFD700', textAlign: 'left', wordBreak: 'break-all' }}>

@@ -8,21 +8,27 @@ const Login = () => {
     const initialEmail = location.state?.email || '';
     
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        const user = loginUser(initialEmail, password);
-        
-        if (user) {
-            // Redirect based on contract status
-            if (user.contractStatus === 'ACTIVE') {
-                navigate('/dashboard');
+        setIsProcessing(true);
+        setError('');
+        try {
+            const user = await loginUser(initialEmail, password);
+            if (user) {
+                if (user.contractStatus === 'ACTIVE') {
+                    navigate('/dashboard');
+                } else {
+                    navigate('/comprar');
+                }
             } else {
-                navigate('/comprar');
+                setError('Contraseña incorrecta.');
             }
-        } else {
-            setError('Contraseña incorrecta.');
+        } catch(e) {
+            setError('Error al conectar con la base de datos.');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -48,8 +54,8 @@ const Login = () => {
                         {error && <p style={{ color: 'var(--danger)', fontSize: '12px', marginTop: '8px', textAlign: 'left' }}>{error}</p>}
                     </div>
                     
-                    <button type="submit" className="glass-btn" style={{ width: '100%', marginTop: '16px' }}>
-                        Entrar al Ecosistema
+                    <button type="submit" className="glass-btn" style={{ width: '100%', marginTop: '16px' }} disabled={isProcessing}>
+                        {isProcessing ? 'Conectando...' : 'Entrar al Ecosistema'}
                     </button>
                     
                     <button 
