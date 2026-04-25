@@ -175,6 +175,7 @@ const Register = () => {
                     <p style={{ color: '#ff4444', fontSize: '13px', marginTop: '16px' }}>{error}</p>
                 </div>
             ) : userCount === 0 ? (
+                <div className="glass-panel" style={{ padding: '60px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
                     <Shield size={64} color="var(--primary)" style={{ marginBottom: '24px' }} />
                     {debugInfo && (
                         <div style={{ background: 'rgba(255, 255, 0, 0.1)', border: '1px solid #FFD700', padding: '10px', borderRadius: '4px', marginBottom: '16px', fontSize: '11px', color: '#FFD700', textAlign: 'left', wordBreak: 'break-all' }}>
