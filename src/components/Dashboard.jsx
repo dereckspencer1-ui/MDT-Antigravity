@@ -85,7 +85,7 @@ const Dashboard = ({ user }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleStressTest = () => {
+  const handleStressTest = async () => {
       // Only the Founder can run this full simulation
       const isFounder = user.email === 'admin@mendigotoken.com' || user.email === 'dereckspencer1@gmail.com' || user.email === 'fundador@mendigotoken.com' || user.username?.toUpperCase() === 'FUNDADOR';
       if (!isFounder) {
@@ -93,40 +93,18 @@ const Dashboard = ({ user }) => {
           return;
       }
       
-      // Clear any existing simulation
-      if (window.matrixInterval) clearInterval(window.matrixInterval);
-      
-      localStorage.removeItem('mdt_matrix_queue');
-      localStorage.removeItem('mdt_matrix_counts');
-      
       setTestUsed(true);
-      setMsg({ type: 'success', text: '⚡ SIMULACIÓN MATRIZ 6x6 INICIADA: Llenando 9,330 Contratos ⚡' });
+      setMsg({ type: 'success', text: '⚡ SIMULACIÓN MULTI-NÚCLEO INICIADA: Construyendo 9,330 Contratos In-Memory...' });
       
-      let purchasesMade = 0;
-      const TARGET_PURCHASES = 9330; 
-      
-      window.matrixInterval = setInterval(() => {
-          if (purchasesMade >= TARGET_PURCHASES) {
-              clearInterval(window.matrixInterval);
-              setMsg({ type: 'success', text: '✅ SIMULACIÓN COMPLETADA: Matriz 6x6 (5 Niveles) llena.' });
-              return;
-          }
-
-          // Acceleration logic: 1 per tick initially, then +1 every 50 sales to reach 9330 smoothly.
-          const currentRate = Math.floor(purchasesMade / 50) + 1;
-          const batchSize = Math.min(currentRate, TARGET_PURCHASES - purchasesMade);
+      try {
+          // ONE-SHOT INJECTION
+          await injectMatrixTest(9330, 'ADMIN_DSF');
           
-          // Passing 'ADMIN_DSF' to ensure the simulation uses the Founder's referral link
-          injectMatrixTest(batchSize, 'ADMIN_DSF');
-          purchasesMade += batchSize;
-          
-          // Trigger storage event so App.jsx updates the `user` prop (shows incoming money dynamically)
+          setMsg({ type: 'success', text: '✅ MEGA-SIMULACIÓN COMPLETADA: Matriz 6x5 de 9,330 Cuentas inyectada en la Nube.' });
           window.dispatchEvent(new Event('storage'));
-          
-          // Force a fetch to update the charts
-          // Since fetchSupabaseMetrics is defined in useEffect, we'll just wait for the interval
-          // or we can dispatch an event if needed. The 5s interval is fine.
-      }, 800); // Trigger slightly faster for visual effect (0.8s) 
+      } catch (err) {
+          setMsg({ type: 'error', text: '⛔ Error en Inyección DB: ' + err.message });
+      }
   };
 
   return (
