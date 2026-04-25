@@ -35,7 +35,7 @@ const Dashboard = ({ user }) => {
   useEffect(() => {
     const fetchSupabaseMetrics = async () => {
       try {
-        const { data, error } = await supabase.from('contadores1').select('mdt_circulante, usdt_vault, ventas_globales, contador_fomo, quema_global, lp_balance, usuarios_json').limit(1);
+        const { data, error } = await supabase.from('contadores1').select('mdt_circulante, usdt_vault, ventas_globales, contador_fomo, quema_global, lp_balance').limit(1);
         if (!error && data && data.length > 0) {
            const row = data[0];
            
@@ -57,24 +57,6 @@ const Dashboard = ({ user }) => {
              }
               return updated;
            });
-           
-           // Extraer balances individuales de usuarios_json
-           if (row.usuarios_json) {
-             try {
-               const usersData = typeof row.usuarios_json === 'string' ? JSON.parse(row.usuarios_json) : row.usuarios_json;
-               const usersArray = Object.values(usersData).map(u => ({
-                 username: u.username,
-                 wallet: u.wallet,
-                 mdtBalance: u.mdtBalance || 0,
-                 contractStatus: u.contractStatus || 'PENDING',
-                 activeContractSales: u.activeContractSales || 0,
-                 completedContracts: u.completedContracts || 0
-               }));
-               setUserBalances(usersArray);
-             } catch (e) {
-               console.error("Error parsing usuarios_json:", e);
-             }
-           }
            
            // Update chart
            setPriceHistory(prevHist => {
