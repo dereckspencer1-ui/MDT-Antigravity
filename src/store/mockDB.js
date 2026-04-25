@@ -515,31 +515,47 @@ export const injectMatrixTest = async (batchSize, referrerId = null) => {
   console.log(`✅ FRACTAL LISTO: Se empujarán ${ramUsers.length} cuentas a la DB simultáneamente respetando rate limit.`);
 
   if (modified) {
-      await updateGlobals(globals);
-
-      // Salvar a nuestro usuario local
-      localStorage.setItem('mdt_current_user', JSON.stringify(founderCached));
-      await saveUser(founderCached, true); // update local cache profile in supbase
-
-      // BULK INSERT a Supabase (Paquetes de 1000)
-      const chunkSize = 1000;
+      // BULK INSERT a Supabase (Paquetes de 500 para evitar que Supabase bloquee la conexión por Payload muy grande)
+      const chunkSize = 500;
+      let insertSuccess = true;
+      
+      console.log(`📦 Empujando cuentas a Supabase en paquetes de ${chunkSize}...`);
       for (let i = 0; i < ramUsers.length; i += chunkSize) {
           const chunk = ramUsers.slice(i, i + chunkSize);
-          await supabase.from('mdt_users').insert(chunk);
-          console.log(`📦 Insertados ${i + chunk.length}/${ramUsers.length} en la nube...`);
-      }
-      
-      // Pay the Developer Pool in Bulk at the very end
-      const devAccumulated = ramUsers.length * (0.50); // Approximated
-      try {
-          const { data: devQ } = await supabase.from('mdt_users').select('*').eq('email', 'dev@mendigotoken.com').limit(1);
-          if (devQ && devQ[0]) {
-              const d = devQ[0];
-              d.usdtBalance = (d.usdtBalance || 0) + devAccumulated;
-              await saveUser(d, false);
+          const { error } = await supabase.from('mdt_users').insert(chunk);
+          if (error) {
+              console.error(`Error crítico al insertar el lote ${i}:`, error.message);
+              insertSuccess = false;
+              break; // Detener inserción si falla la DB
           }
-      } catch (e) {
-          console.warn("Dev account skipped in simulation", e);
+          console.log(`✅ Insertados ${Math.min(i + chunkSize, ramUsers.length)}/${ramUsers.length} en la nube...`);
+      }
+
+      // SOLO si la inserción de todas las cuentas fue exitosa, actualizamos los contadores Globales
+      // Esto evita el bug donde los contadores se inflaban (mostrando más de 100mil) sin que las cuentas realmente existieran.
+      if (insertSuccess) {
+          await updateGlobals(globals);
+
+          // Salvar a nuestro usuario local
+          localStorage.setItem('mdt_current_user', JSON.stringify(founderCached));
+          await saveUser(founderCached, true); // update local cache profile in supbase
+
+          // Pay the Developer Pool in Bulk at the very end
+          const devAccumulated = ramUsers.length * (0.50); // Approximated
+          try {
+              const { data: devQ } = await supabase.from('mdt_users').select('*').eq('email', 'dev@mendigotoken.com').limit(1);
+              if (devQ && devQ[0]) {
+                  const d = devQ[0];
+                  d.usdtBalance = (d.usdtBalance || 0) + devAccumulated;
+                  await saveUser(d, false);
+              }
+          } catch (e) {
+              console.warn("Dev account skipped in simulation", e);
+          }
+          console.log(`🎉 MEGA-SIMULACIÓN 6x5 COMPLETADA CON ÉXITO.`);
+      } else {
+          console.error(`🚨 MEGA-SIMULACIÓN ABORTADA DEBIDO A ERRORES EN SUPABASE. Los contadores no fueron alterados para proteger la red.`);
+          throw new Error("Fallo en la base de datos al inyectar miles de cuentas.");
       }
   }
 

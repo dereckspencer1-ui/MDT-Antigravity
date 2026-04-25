@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { getUserByEmail } from '../store/mockDB';
+import { getUserByEmail, getNetworkIsActive } from '../store/mockDB';
 import { LogIn } from 'lucide-react';
 import YinYang from '../components/YinYang';
 
@@ -34,6 +34,15 @@ const Home = () => {
           // Pass the email to the Login page
           navigate('/login', { state: { email } });
         } else {
+          const isNetworkLive = await getNetworkIsActive();
+          
+          // DIAGRAMA DE FLUJO: Si la red no ha arrancado (Génesis), SÓLO el fundador puede registrarse.
+          if (!isNetworkLive && email.toLowerCase() !== 'dereckspencer1@gmail.com') {
+             setError('Acceso Denegado: La red aún no ha sido inicializada. Solo el Fundador puede crear el Bloque Génesis.');
+             setIsProcessing(false);
+             return;
+          }
+
           // Extraemos el parámetro ref si existe
           const searchParams = new URLSearchParams(location.search);
           const referralId = searchParams.get('ref');

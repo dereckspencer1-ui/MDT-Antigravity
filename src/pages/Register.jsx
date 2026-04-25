@@ -113,9 +113,9 @@ const Register = () => {
         
         // GENESIS BLOCK AUTHORIZATION CHECK
         if (users.length === 0 && !isNetworkLive) {
-            const validEmails = ['fundador@mendigotoken.com', 'admin@mendigotoken.com', 'dereckspencer1@gmail.com'];
+            const validEmails = ['dereckspencer1@gmail.com'];
             if (!validEmails.includes(formData.email.toLowerCase())) {
-                setError('Error de Seguridad: Sólo el Fundador Creador está autorizado para inicializar el Bloque Génesis.');
+                setError('Error de Seguridad: Sólo el Fundador Creador (dereckspencer1) está autorizado para inicializar el Bloque Génesis.');
                 setIsProcessing(false);
                 return;
             }
@@ -203,7 +203,7 @@ const Register = () => {
 
                     <button 
                         type="button"
-                        onClick={() => setFormData({ email: 'fundador@mendigotoken.com', username: 'FUNDADOR', password: '123', wallet: '' })}
+                        onClick={() => setFormData({ email: 'dereckspencer1@gmail.com', username: 'FUNDADOR', password: '123', wallet: '' })}
                         style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #F59E0B', color: '#F59E0B', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginBottom: '24px', fontSize: '13px', width: '100%' }}
                     >
                         ⚡ Autocompletar Llave de Fundador ⚡
