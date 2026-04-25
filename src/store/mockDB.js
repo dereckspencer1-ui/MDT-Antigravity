@@ -44,8 +44,8 @@ if (typeof window !== 'undefined') {
 
 // --- User Management ---
 export async function getUserByEmail(email) {
-  const { data } = await supabase.from('mdt_users').select('*').ilike('email', email).single();
-  return data;
+  const { data } = await supabase.from('mdt_users').select('*').ilike('email', email).limit(1);
+  return data && data.length > 0 ? data[0] : null;
 }
 
 export async function getUserById(id) {
