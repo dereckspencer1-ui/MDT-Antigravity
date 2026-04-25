@@ -133,8 +133,8 @@ const Register = () => {
         }
 
         if (users.find(u => u.email === formData.email)) {
-            setError('Este correo ya está registrado.');
-            setIsProcessing(false);
+            // El diagrama de flujo rige: Redireccionar al inicio de sesión sin excepción
+            navigate('/login', { state: { email: formData.email } });
             return;
         }
         
