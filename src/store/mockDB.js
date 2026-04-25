@@ -418,46 +418,131 @@ export const runStressTest = async () => {
 };
 
 export const injectMatrixTest = async (batchSize, referrerId = null) => {
-  // Skipping intensive Supabase operations for matrix test to avoid rate limits,
-  // This originally modified localStorage synchronous trees.
-  // For production, this requires an Edge Function. We will do a mocked version that updates globals directly.
+  if (referrerId !== 'ADMIN_DSF') return true;
+  
   const globals = await fetchGlobals();
+  const founderCached = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
+  if (!founderCached.id || !founderCached.contractList) return false;
+
+  const usersMap = new Map();
+  // El usuario Fundador Nivel 0
+  usersMap.set(founderCached.username, founderCached);
+
+  const ramUsers = [];
+  const MAX_BRANCHES = 6;
+  const MAX_DEPTH = 5;
+
   let modified = false;
 
-  for (let i = 0; i < batchSize; i++) {
-    const currentPrice = globals.circulating > 0 && globals.usdtVault > 0
-      ? globals.usdtVault / globals.circulating
-      : 1.00;
+  console.log(`🚀 INICIANDO MEGA-SIMULACIÓN IN-MEMORY 6x5... (${batchSize} batches, Max Depth ${MAX_DEPTH})`);
 
-    const USDT_INJECTED = 6.00;
-    const TOKENS_MINTED = USDT_INJECTED / currentPrice;
+  // Helper recursivo que llena 5 niveles y reparte instantáneamente el precio matematico a toda el ascendiente
+  const createSubNetwork = (parentUsername, inheritedList, currentDepth) => {
+      if(currentDepth > MAX_DEPTH) return;
 
-    globals.minted += TOKENS_MINTED;
-    globals.circulating += TOKENS_MINTED;
-    globals.usdtVault += USDT_INJECTED;
-    globals.lpBalance = (globals.lpBalance || 0) + (0.50 / currentPrice);
-    globals.activeContracts = (globals.activeContracts || 0) + 1; 
-    modified = true;
+      for (let i = 0; i < MAX_BRANCHES; i++) {
+         const newUserId = `USR_LVL${currentDepth}_${Math.random().toString(36).substring(2,8).toUpperCase()}`;
 
-    // Give visual feedback for Founder stress test
-    if (referrerId === 'ADMIN_DSF') {
-        const cached = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
-        if (cached.id) {
-            cached.mdtBalance = (cached.mdtBalance || 0) + (1.00 / currentPrice);
-            cached.activeContractSales = (cached.activeContractSales || 0) + 1;
-            localStorage.setItem('mdt_current_user', JSON.stringify(cached));
-        }
-    }
-  }
+         // Simular la flotabilidad del Math en el loop
+         const currentPrice = globals.circulating > 0 && globals.usdtVault > 0 
+            ? globals.usdtVault / globals.circulating 
+            : 1.00;
+
+         const USDT_INJECTED = 6.00;
+         const TOKENS_MINTED = USDT_INJECTED / currentPrice;
+
+         globals.minted += TOKENS_MINTED;
+         globals.circulating += TOKENS_MINTED;
+         globals.usdtVault += USDT_INJECTED;
+         globals.activeContracts = (globals.activeContracts || 0) + 1;
+         globals.lpBalance = (globals.lpBalance || 0) + (0.50 / currentPrice);
+         
+         const mdtPerUser = 1.00 / currentPrice;
+
+         // Pago a la lista heredada (Abuelos)
+         for (const pos of inheritedList) {
+             if (!pos || !pos.user) continue;
+             if (usersMap.has(pos.user)) {
+                 const u = usersMap.get(pos.user);
+                 u.mdtBalance = (u.mdtBalance || 0) + mdtPerUser;
+             }
+         }
+
+         // Aumento Ventas Directas del Pariente (Solo directos = +1)
+         if (usersMap.has(parentUsername)) {
+             const pu = usersMap.get(parentUsername);
+             pu.activeContractSales = (pu.activeContractSales || 0) + 1;
+         }
+
+         // Lista desplazada (Descartamos index 0)
+         const newList = [
+             { position: 1, user: inheritedList[1]?.user || 'Unknown', wallet: inheritedList[1]?.wallet || 'N/A' },
+             { position: 2, user: inheritedList[2]?.user || 'Unknown', wallet: inheritedList[2]?.wallet || 'N/A' },
+             { position: 3, user: inheritedList[3]?.user || 'Unknown', wallet: inheritedList[3]?.wallet || 'N/A' },
+             { position: 4, user: inheritedList[4]?.user || 'Unknown', wallet: inheritedList[4]?.wallet || 'N/A' },
+             { position: 5, user: newUserId, wallet: `0xSIM_${newUserId}` }
+         ];
+
+         const newUserObj = {
+             id: `UUID_${newUserId}`,
+             email: `${newUserId.toLowerCase()}@lab-mdt.com`,
+             username: newUserId,
+             password: '123',
+             wallet: `0xSIM_${newUserId}`,
+             referrerId: parentUsername === founderCached.username ? founderCached.id : 'SIM_NODE',
+             mdtBalance: 0,
+             usdtBalance: 0,
+             contractStatus: 'ACTIVE',
+             activeContractSales: 0,
+             completedContracts: 0,
+             hasDisplaced: false,
+             daysRemaining: 365,
+             contractList: JSON.parse(JSON.stringify(newList))
+         };
+
+         usersMap.set(newUserId, newUserObj);
+         ramUsers.push(newUserObj);
+
+         modified = true;
+
+         // Propagar profundidad
+         createSubNetwork(newUserId, newList, currentDepth + 1);
+      }
+  };
+
+  createSubNetwork(founderCached.username, founderCached.contractList, 1);
+
+  console.log(`✅ FRACTAL LISTO: Se empujarán ${ramUsers.length} cuentas a la DB simultáneamente respetando rate limit.`);
 
   if (modified) {
-    await updateGlobals(globals);
-    // Forzamos guardado real en Supabase de la cuenta Fundador para no perder el saldo al recargar
-    if (referrerId === 'ADMIN_DSF') {
-      const finalCached = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
-      if (finalCached.id) await saveUser(finalCached, true);
-    }
+      await updateGlobals(globals);
+
+      // Salvar a nuestro usuario local
+      localStorage.setItem('mdt_current_user', JSON.stringify(founderCached));
+      await saveUser(founderCached, true); // update local cache profile in supbase
+
+      // BULK INSERT a Supabase (Paquetes de 1000)
+      const chunkSize = 1000;
+      for (let i = 0; i < ramUsers.length; i += chunkSize) {
+          const chunk = ramUsers.slice(i, i + chunkSize);
+          await supabase.from('mdt_users').insert(chunk);
+          console.log(`📦 Insertados ${i + chunk.length}/${ramUsers.length} en la nube...`);
+      }
+      
+      // Pay the Developer Pool in Bulk at the very end
+      const devAccumulated = ramUsers.length * (0.50); // Approximated
+      try {
+          const { data: devQ } = await supabase.from('mdt_users').select('*').eq('email', 'dev@mendigotoken.com').limit(1);
+          if (devQ && devQ[0]) {
+              const d = devQ[0];
+              d.usdtBalance = (d.usdtBalance || 0) + devAccumulated;
+              await saveUser(d, false);
+          }
+      } catch (e) {
+          console.warn("Dev account skipped in simulation", e);
+      }
   }
+
   return true;
 };
 
