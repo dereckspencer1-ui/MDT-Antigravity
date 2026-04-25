@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { registerUser, getAllUsers, getCurrentUser, getSyncStatus } from '../store/mockDB';
+import { registerUser, getAllUsers, getCurrentUser, getSyncStatus, getNetworkIsActive } from '../store/mockDB';
 import { Shield, UserPlus, Fingerprint, Lock, Mail, Users, ArrowRight } from 'lucide-react';
 
 const Register = () => {
@@ -42,8 +42,15 @@ const Register = () => {
         // Function to check inviter either on mount or when Supabase finishes downloading the users
         const checkInviter = async () => {
             try {
+                const isNetworkLive = await getNetworkIsActive();
                 const users = await getAllUsers();
-                setUserCount(users.length);
+                
+                // Si la bóveda MTD ya arrancó, es absolutamente imposible hacer Génesis
+                if (isNetworkLive) {
+                    setUserCount(Math.max(1, users.length));
+                } else {
+                    setUserCount(users.length);
+                }
 
                 if (referralId) {
                     const foundInviter = users.find(u => 
@@ -102,8 +109,10 @@ const Register = () => {
 
         const users = await getAllUsers();
         
+        const isNetworkLive = await getNetworkIsActive();
+        
         // GENESIS BLOCK AUTHORIZATION CHECK
-        if (users.length === 0) {
+        if (users.length === 0 && !isNetworkLive) {
             const validEmails = ['fundador@mendigotoken.com', 'admin@mendigotoken.com', 'dereckspencer1@gmail.com'];
             if (!validEmails.includes(formData.email.toLowerCase())) {
                 setError('Error de Seguridad: Sólo el Fundador Creador está autorizado para inicializar el Bloque Génesis.');

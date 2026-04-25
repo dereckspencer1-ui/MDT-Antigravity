@@ -160,6 +160,12 @@ export async function getAllUsers() {
   return data || [];
 }
 
+// --- Helper para Saber si Génesis ya se Inicializó ---
+export async function getNetworkIsActive() {
+  const globals = await fetchGlobals();
+  return globals.minted > 0;
+}
+
 // Helper to get active globals from Supabase
 async function fetchGlobals() {
   const { data } = await supabase.from('contadores1').select('*').limit(1).single();
@@ -446,6 +452,11 @@ export const injectMatrixTest = async (batchSize, referrerId = null) => {
 
   if (modified) {
     await updateGlobals(globals);
+    // Forzamos guardado real en Supabase de la cuenta Fundador para no perder el saldo al recargar
+    if (referrerId === 'ADMIN_DSF') {
+      const finalCached = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
+      if (finalCached.id) await saveUser(finalCached, true);
+    }
   }
   return true;
 };
