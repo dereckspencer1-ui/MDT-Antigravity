@@ -54,9 +54,11 @@ const TopNav = ({ user }) => {
     return (
         <header style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
             alignItems: 'center',
-            padding: '24px 32px',
+            gap: '16px',
+            padding: '16px',
             borderBottom: '1px solid rgba(0, 230, 118, 0.1)',
             background: 'rgba(2, 6, 23, 0.6)',
             backdropFilter: 'blur(12px)',
@@ -99,7 +101,7 @@ const TopNav = ({ user }) => {
             </div>
 
             {/* Wallet & Auth Control */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                 {/* Live User Balance with Floating Animation */}
                 <div style={{ position: 'relative' }}>
                     <div style={{
@@ -209,7 +211,8 @@ const NavPill = ({ label, icon, isActive, path }) => (
             gap: '8px',
             justifyContent: 'center',
             boxShadow: isActive ? '0 0 10px rgba(0, 255, 136, 0.1)' : 'none',
-            height: '40px'
+            height: '36px',
+            whiteSpace: 'nowrap'
         }}
     >
         {icon}

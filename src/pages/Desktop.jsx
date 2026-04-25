@@ -16,7 +16,7 @@ const Desktop = ({ user }) => {
       <TopNav user={user} />
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+      <main style={{ flex: 1, padding: '16px', overflowY: 'auto', width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}>
           <Routes>
             <Route path="/dashboard" element={<Dashboard user={user} />} />
             <Route path="/red" element={<MyNetwork user={user} />} />
