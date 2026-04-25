@@ -9,6 +9,7 @@ const Login = () => {
     
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState('');
 
     const handleLogin = async (e) => {
         e.preventDefault();
