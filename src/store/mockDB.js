@@ -417,64 +417,31 @@ export const runStressTest = async () => {
   return true;
 };
 
-export const injectMatrixTest = async (batchSize, referrerId = null) => {
+export const injectMatrixTest = async (maxTotalSales = 9330, referrerId = null) => {
   if (referrerId !== 'ADMIN_DSF') return true;
   
   const globals = await fetchGlobals();
   const founderCached = JSON.parse(localStorage.getItem('mdt_current_user') || '{}');
   if (!founderCached.id || !founderCached.contractList) return false;
 
+  console.log(`🚀 INICIANDO MEGA-SIMULACIÓN ORGÁNICA EXPONENCIAL 6x5...`);
+
+  // 1. GENERAR ÁRBOL REAL 6x5 EN MEMORIA
   const usersMap = new Map();
-  // El usuario Fundador Nivel 0
   usersMap.set(founderCached.username, founderCached);
 
   const ramUsers = [];
   const MAX_BRANCHES = 6;
   const MAX_DEPTH = 5;
 
-  let modified = false;
-
-  console.log(`🚀 INICIANDO MEGA-SIMULACIÓN IN-MEMORY 6x5... (${batchSize} batches, Max Depth ${MAX_DEPTH})`);
-
-  // Helper recursivo que llena 5 niveles y reparte instantáneamente el precio matematico a toda el ascendiente
   const createSubNetwork = (parentUsername, inheritedList, currentDepth) => {
       if(currentDepth > MAX_DEPTH) return;
 
       for (let i = 0; i < MAX_BRANCHES; i++) {
-         const newUserId = `USR_LVL${currentDepth}_${Math.random().toString(36).substring(2,8).toUpperCase()}`;
+         if (ramUsers.length >= maxTotalSales) return;
 
-         // Simular la flotabilidad del Math en el loop
-         const currentPrice = globals.circulating > 0 && globals.usdtVault > 0 
-            ? globals.usdtVault / globals.circulating 
-            : 1.00;
+         const newUserId = `ORG_${currentDepth}_${Math.random().toString(36).substring(2,8).toUpperCase()}`;
 
-         const USDT_INJECTED = 6.00;
-         const TOKENS_MINTED = USDT_INJECTED / currentPrice;
-
-         globals.minted += TOKENS_MINTED;
-         globals.circulating += TOKENS_MINTED;
-         globals.usdtVault += USDT_INJECTED;
-         globals.activeContracts = (globals.activeContracts || 0) + 1;
-         globals.lpBalance = (globals.lpBalance || 0) + (0.50 / currentPrice);
-         
-         const mdtPerUser = 1.00 / currentPrice;
-
-         // Pago a la lista heredada (Abuelos)
-         for (const pos of inheritedList) {
-             if (!pos || !pos.user) continue;
-             if (usersMap.has(pos.user)) {
-                 const u = usersMap.get(pos.user);
-                 u.mdtBalance = (u.mdtBalance || 0) + mdtPerUser;
-             }
-         }
-
-         // Aumento Ventas Directas del Pariente (Solo directos = +1)
-         if (usersMap.has(parentUsername)) {
-             const pu = usersMap.get(parentUsername);
-             pu.activeContractSales = (pu.activeContractSales || 0) + 1;
-         }
-
-         // Lista desplazada (Descartamos index 0)
          const newList = [
              { position: 1, user: inheritedList[1]?.user || 'Unknown', wallet: inheritedList[1]?.wallet || 'N/A' },
              { position: 2, user: inheritedList[2]?.user || 'Unknown', wallet: inheritedList[2]?.wallet || 'N/A' },
@@ -500,65 +467,107 @@ export const injectMatrixTest = async (batchSize, referrerId = null) => {
              contractList: JSON.parse(JSON.stringify(newList))
          };
 
+         newUserObj._inheritedList = inheritedList;
+         newUserObj._parentUsername = parentUsername;
+
          usersMap.set(newUserId, newUserObj);
          ramUsers.push(newUserObj);
 
-         modified = true;
-
-         // Propagar profundidad
          createSubNetwork(newUserId, newList, currentDepth + 1);
       }
   };
 
+  // Construir el fractal matemático (toma milisegundos)
   createSubNetwork(founderCached.username, founderCached.contractList, 1);
+  console.log(`✅ ÁRBOL FRACTAL GENERADO: ${ramUsers.length} cuentas reales listas para inyección.`);
 
-  console.log(`✅ FRACTAL LISTO: Se empujarán ${ramUsers.length} cuentas a la DB simultáneamente respetando rate limit.`);
+  // 2. INYECTAR A LA BASE DE DATOS PROGRESIVAMENTE (EXPONENCIAL)
+  let currentSaleSpeed = 1000; 
+  let totalInjected = 0;
+  let batchSize = 1;
 
-  if (modified) {
-      // BULK INSERT a Supabase (Paquetes de 500 para evitar que Supabase bloquee la conexión por Payload muy grande)
-      const chunkSize = 500;
-      let insertSuccess = true;
+  for (let i = 0; i < ramUsers.length; ) {
+      // Ajuste de velocidad según lo que pediste
+      if (totalInjected >= 50) batchSize = 2;
+      if (totalInjected >= 100) batchSize = 4;
+      if (totalInjected >= 200) batchSize = 8;
+      if (totalInjected >= 400) batchSize = 16;
+      if (totalInjected >= 800) batchSize = 32;
+      if (totalInjected >= 1600) batchSize = 64;
+      if (totalInjected >= 3200) batchSize = 128;
+      if (totalInjected >= 6400) batchSize = 256;
+
+      const chunk = ramUsers.slice(i, i + batchSize);
+      if (chunk.length === 0) break;
+
+      // Realizar la matemática del lote (Pago de comisiones real)
+      for (const user of chunk) {
+          const currentPrice = globals.circulating > 0 && globals.usdtVault > 0 ? globals.usdtVault / globals.circulating : 1.00;
+          const USDT_INJECTED = 6.00;
+          const TOKENS_MINTED = USDT_INJECTED / currentPrice;
+
+          globals.minted += TOKENS_MINTED;
+          globals.circulating += TOKENS_MINTED;
+          globals.usdtVault += USDT_INJECTED;
+          globals.activeContracts += 1;
+          globals.lpBalance += (0.50 / currentPrice);
+          
+          const mdtPerUser = 1.00 / currentPrice;
+
+          // Pago a toda la cadena de ancestros (comisiones reales)
+          if (user._inheritedList) {
+             for (const pos of user._inheritedList) {
+                 if (!pos || !pos.user) continue;
+                 if (usersMap.has(pos.user)) {
+                     const u = usersMap.get(pos.user);
+                     u.mdtBalance = (u.mdtBalance || 0) + mdtPerUser;
+                 }
+             }
+          }
+
+          // Aumento de ventas directas
+          if (user._parentUsername && usersMap.has(user._parentUsername)) {
+             const pu = usersMap.get(user._parentUsername);
+             pu.activeContractSales = (pu.activeContractSales || 0) + 1;
+          }
+
+          delete user._inheritedList;
+          delete user._parentUsername;
+          totalInjected++;
+      }
+
+      // Insertar en la Nube
+      const { error } = await supabase.from('mdt_users').insert(chunk);
+      if (error) {
+          console.error(`🚨 Error en inserción de lote:`, error.message);
+          break; 
+      }
+
+      // Actualizar Globales y UI
+      await updateGlobals(globals);
       
-      console.log(`📦 Empujando cuentas a Supabase en paquetes de ${chunkSize}...`);
-      for (let i = 0; i < ramUsers.length; i += chunkSize) {
-          const chunk = ramUsers.slice(i, i + chunkSize);
-          const { error } = await supabase.from('mdt_users').insert(chunk);
-          if (error) {
-              console.error(`Error crítico al insertar el lote ${i}:`, error.message);
-              insertSuccess = false;
-              break; // Detener inserción si falla la DB
-          }
-          console.log(`✅ Insertados ${Math.min(i + chunkSize, ramUsers.length)}/${ramUsers.length} en la nube...`);
-      }
+      // Actualizar Fundador localmente si su saldo cambió
+      localStorage.setItem('mdt_current_user', JSON.stringify(founderCached));
+      await saveUser(founderCached, true);
+      
+      console.log(`📈 CRECIMIENTO ORGÁNICO: ${totalInjected} cuentas reales en la red...`);
+      i += batchSize;
 
-      // SOLO si la inserción de todas las cuentas fue exitosa, actualizamos los contadores Globales
-      // Esto evita el bug donde los contadores se inflaban (mostrando más de 100mil) sin que las cuentas realmente existieran.
-      if (insertSuccess) {
-          await updateGlobals(globals);
-
-          // Salvar a nuestro usuario local
-          localStorage.setItem('mdt_current_user', JSON.stringify(founderCached));
-          await saveUser(founderCached, true); // update local cache profile in supbase
-
-          // Pay the Developer Pool in Bulk at the very end
-          const devAccumulated = ramUsers.length * (0.50); // Approximated
-          try {
-              const { data: devQ } = await supabase.from('mdt_users').select('*').eq('email', 'dev@mendigotoken.com').limit(1);
-              if (devQ && devQ[0]) {
-                  const d = devQ[0];
-                  d.usdtBalance = (d.usdtBalance || 0) + devAccumulated;
-                  await saveUser(d, false);
-              }
-          } catch (e) {
-              console.warn("Dev account skipped in simulation", e);
-          }
-          console.log(`🎉 MEGA-SIMULACIÓN 6x5 COMPLETADA CON ÉXITO.`);
-      } else {
-          console.error(`🚨 MEGA-SIMULACIÓN ABORTADA DEBIDO A ERRORES EN SUPABASE. Los contadores no fueron alterados para proteger la red.`);
-          throw new Error("Fallo en la base de datos al inyectar miles de cuentas.");
-      }
+      await new Promise(resolve => setTimeout(resolve, currentSaleSpeed));
   }
 
+  // Developer pool
+  try {
+      const devAccumulated = ramUsers.length * 0.50;
+      const { data: devQ } = await supabase.from('mdt_users').select('*').eq('email', 'dev@mendigotoken.com').limit(1);
+      if (devQ && devQ[0]) {
+          const d = devQ[0];
+          d.usdtBalance = (d.usdtBalance || 0) + devAccumulated;
+          await saveUser(d, false);
+      }
+  } catch (e) { }
+
+  console.log(`🎉 SIMULACIÓN ORGÁNICA COMPLETADA.`);
   return true;
 };
 
